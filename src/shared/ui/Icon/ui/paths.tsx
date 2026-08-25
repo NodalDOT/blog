@@ -11,6 +11,7 @@ export type IconName =
     | "play"
     | "arrow-up"
     | "arrow-down"
+    | "arrow-left"
     | "sun"
     | "moon";
 
@@ -77,6 +78,7 @@ export const ICON_PATHS: Record<IconName, ReactNode> = {
             <path d="m19 12-7 7-7-7" />
         </>
     ),
+    "arrow-left": <path d="M15 18 9 12l6-6" />,
     sun: (
         <>
             <circle cx="12" cy="12" r="4" />
