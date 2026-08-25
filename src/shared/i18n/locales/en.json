@@ -51,6 +51,9 @@
         "posts": "Posts",
         "ariaLabel": "Main navigation"
     },
+    "SkipLink": {
+        "label": "Skip to main content"
+    },
     "Theme": {
         "toggle": "Toggle theme",
         "switchTo": {

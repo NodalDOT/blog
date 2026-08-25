@@ -21,21 +21,19 @@ export const LanguageSwitcher: FC = () => {
         <div className={styles["language-switcher"]}>
             <button
                 type="button"
-                aria-haspopup="menu"
                 aria-label={t("ariaLabel")}
                 className={styles["language-switcher__trigger"]}
             >
                 <Icon name="languages" size={24} />
             </button>
 
-            <ul role="menu" className={styles["language-switcher__options"]}>
+            <ul className={styles["language-switcher__options"]}>
                 {routing.locales.map((lang) => (
-                    <li role="none" key={lang}>
+                    <li key={lang}>
                         <button
                             type="button"
                             onClick={() => handleLangChange(lang)}
-                            role="menuitemradio"
-                            aria-checked={locale === lang}
+                            aria-current={locale === lang ? "true" : undefined}
                             className={classNames(locale === lang && styles["selected"])}
                             disabled={locale === lang}
                         >

@@ -1,4 +1,4 @@
-import React, { type FC, type InputHTMLAttributes } from "react";
+import React, { type FC, type InputHTMLAttributes, useId } from "react";
 import styles from "./Input.module.scss";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -6,13 +6,24 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     label?: string;
 }
 
-export const Input: FC<InputProps> = ({ icon, label, className, ...props }) => {
+export const Input: FC<InputProps> = ({ icon, label, className, id, ...props }) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
+
     return (
         <div className={styles["input"]}>
-            {label && <span className={styles["input__label"]}>{label}</span>}
+            {label && (
+                <label htmlFor={inputId} className={styles["input__label"]}>
+                    {label}
+                </label>
+            )}
             <div className={`${styles["input__wrapper"]}`}>
                 {icon && <div className={styles["input__icon"]}>{icon}</div>}
-                <input {...props} className={`${styles["input__field"]} ${className || ""}`} />
+                <input
+                    id={inputId}
+                    {...props}
+                    className={`${styles["input__field"]} ${className || ""}`}
+                />
             </div>
         </div>
     );

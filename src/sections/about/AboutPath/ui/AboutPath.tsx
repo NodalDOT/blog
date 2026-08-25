@@ -136,45 +136,49 @@ export const AboutPath: FC = () => {
         <section ref={containerRef} className={classNames(styles["about-path"], "section")}>
             <h2 className={styles["about-path__title"]}>{t("title")}</h2>
 
-            <ol className={styles["about-path__list"]}>
+            <div className={styles["about-path__list-wrapper"]}>
                 <div ref={progressRef} className={styles["about-path__progress"]} />
 
                 <div ref={ballRef} className={styles["about-path__ball"]} />
 
-                {itemKeys.map((key, i) => {
-                    const tags = t(`items.${key}.tags`)
-                        .split(",")
-                        .map((s) => s.trim());
+                <ol className={styles["about-path__list"]}>
+                    {itemKeys.map((key, i) => {
+                        const tags = t(`items.${key}.tags`)
+                            .split(",")
+                            .map((s) => s.trim());
 
-                    return (
-                        <li
-                            key={key}
-                            ref={(el) => {
-                                if (el) itemsRef.current[i] = el;
-                            }}
-                            className={styles["about-path__item"]}
-                        >
-                            <div className={styles["about-path__card"]}>
-                                <div className={styles["about-path__after"]}>
-                                    <h3>{t(`items.${key}.title`)}</h3>
+                        return (
+                            <li
+                                key={key}
+                                ref={(el) => {
+                                    if (el) itemsRef.current[i] = el;
+                                }}
+                                className={styles["about-path__item"]}
+                            >
+                                <div className={styles["about-path__card"]}>
+                                    <div className={styles["about-path__after"]}>
+                                        <h3>{t(`items.${key}.title`)}</h3>
 
-                                    <span className={styles["about-path__date"]}>
-                                        {t(`items.${key}.date`)}
-                                    </span>
+                                        <span className={styles["about-path__date"]}>
+                                            {t(`items.${key}.date`)}
+                                        </span>
 
-                                    <span className={styles["about-path__place"]}>
-                                        {t(`items.${key}.place`)}
-                                    </span>
+                                        <span className={styles["about-path__place"]}>
+                                            {t(`items.${key}.place`)}
+                                        </span>
 
-                                    <Tags tags={tags} className={styles["about-path__tags"]} />
+                                        <Tags tags={tags} className={styles["about-path__tags"]} />
+                                    </div>
+
+                                    <div className={styles["about-path__before"]}>
+                                        {ICON_MAP[key]}
+                                    </div>
                                 </div>
-
-                                <div className={styles["about-path__before"]}>{ICON_MAP[key]}</div>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ol>
+                            </li>
+                        );
+                    })}
+                </ol>
+            </div>
         </section>
     );
 };

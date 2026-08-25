@@ -6,17 +6,9 @@
     flex-direction: column;
     gap: 2rem;
 
-    &__list {
+    &__list-wrapper {
         position: relative;
-
-        display: flex;
-        flex-direction: column;
-        gap: 2.4rem;
-
         margin: 0 10rem;
-        padding: 0;
-
-        list-style: none;
 
         @include tablet {
             margin: 0 6.4rem;
@@ -25,6 +17,17 @@
         @include mobile {
             margin: 0;
         }
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 2.4rem;
+
+        margin: 0;
+        padding: 0;
+
+        list-style: none;
     }
 
     &__progress {

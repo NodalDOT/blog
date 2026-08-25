@@ -1,8 +1,16 @@
 import { Montserrat } from "next/font/google";
 import Script from "next/script";
 import { getLocale } from "next-intl/server";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@/shared/styles/index.scss";
+import { BASE_SEO } from "./[locale]/seo";
+
+export const metadata: Metadata = {
+    title: "NodalDOT",
+    description: BASE_SEO.en.siteName,
+    metadataBase: new URL(BASE_SEO.en.url),
+};
 
 const montserrat = Montserrat({
     subsets: ["latin", "cyrillic"],

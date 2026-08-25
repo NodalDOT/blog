@@ -55,7 +55,7 @@ export const Header: FC = () => {
                 <Navigation links={links} ariaLabel={navAriaLabel} />
             </div>
 
-            <MobileMenu links={links} />
+            <MobileMenu links={links} ariaLabel={navAriaLabel} />
 
             <div className={styles["header__socials"]}>
                 <IconLink

@@ -70,7 +70,7 @@ export const NotFound = () => {
     };
 
     return (
-        <section className={styles["not-found"]} role="alert">
+        <section className={styles["not-found"]}>
             <h1 className={styles["not-found__glitch"]} aria-label={t("heading")}>
                 404
                 <span aria-hidden="true">404</span>

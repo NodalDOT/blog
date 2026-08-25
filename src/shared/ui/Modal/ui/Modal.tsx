@@ -15,11 +15,15 @@ interface ModalProps {
     contentClassName?: string | undefined;
 }
 
+const FOCUSABLE_SELECTOR =
+    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 const Modal: FC<ModalProps> = (props) => {
     const { open, onClose, children, title, description, contentClassName } = props;
     const t = useTranslations("Modal");
     const [mounted, setMounted] = React.useState(false);
     const modalRef = React.useRef<HTMLDivElement>(null);
+    const previouslyFocusedRef = React.useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         const id = requestAnimationFrame(() => {
@@ -27,6 +31,22 @@ const Modal: FC<ModalProps> = (props) => {
         });
         return () => cancelAnimationFrame(id);
     }, []);
+
+    useEffect(() => {
+        if (!open) return;
+
+        previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+        const id = requestAnimationFrame(() => {
+            const focusable = modalRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+            (focusable?.[0] ?? modalRef.current)?.focus();
+        });
+
+        return () => {
+            cancelAnimationFrame(id);
+            previouslyFocusedRef.current?.focus();
+        };
+    }, [open]);
 
     useEffect(() => {
         if (open) {
@@ -47,7 +67,29 @@ const Modal: FC<ModalProps> = (props) => {
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
+            if (e.key === "Escape") {
+                onClose();
+                return;
+            }
+
+            if (e.key !== "Tab" || !modalRef.current) return;
+
+            const focusable = Array.from(
+                modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+            );
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (!first || !last) return;
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         };
         if (open) document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
@@ -69,6 +111,7 @@ const Modal: FC<ModalProps> = (props) => {
         >
             <div
                 ref={modalRef}
+                tabIndex={-1}
                 className={classNames(
                     styles["modal__content"],
                     open && styles["modal__content--open"],

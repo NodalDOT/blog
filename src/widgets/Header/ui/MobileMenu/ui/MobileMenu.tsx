@@ -11,10 +11,11 @@ import { useTranslations } from "next-intl";
 
 interface MobileMenuProps {
     links: { href: string; label: string }[];
+    ariaLabel?: string;
 }
 
 export const MobileMenu: FC<MobileMenuProps> = (props) => {
-    const { links } = props;
+    const { links, ariaLabel } = props;
     const { open, toggleModal, closeModal } = useModal();
     const pathname = usePathname();
     const { startTransition } = usePageTransition();
@@ -37,7 +38,7 @@ export const MobileMenu: FC<MobileMenuProps> = (props) => {
             </button>
 
             <Modal open={open} onClose={closeModal}>
-                <nav className={styles["mobile-menu__nav"]}>
+                <nav className={styles["mobile-menu__nav"]} aria-label={ariaLabel}>
                     {links.map(({ href, label }) => (
                         <Link
                             href={href}

@@ -24,7 +24,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
     toc = [],
 }) => {
     return (
-        <div className={classNames(styles["post-detail"], "section")}>
+        <article className={classNames(styles["post-detail"], "section")}>
             <PostScrollProgress />
 
             <header className={styles["post-detail__hero"]}>
@@ -51,10 +51,10 @@ export const PostDetail: React.FC<PostDetailProps> = ({
             </header>
 
             <div className={styles["post-detail__content-layout"]}>
-                <article className={styles["post-detail__content"]}>{content}</article>
+                <div className={styles["post-detail__content"]}>{content}</div>
 
                 {toc.length > 0 && <PostToc toc={toc} label={tocLabel} />}
             </div>
-        </div>
+        </article>
     );
 };
