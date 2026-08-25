@@ -10,6 +10,8 @@ import { usePageTransition } from "@/app/providers/transition";
 
 export type ViewMode = "compact" | "image" | "video";
 
+const MAX_VISIBLE_TAGS = 3;
+
 export interface PostCardProps {
     id: string;
     title: string;
@@ -32,6 +34,10 @@ const PostCard: FC<PostCardProps> = ({
     const { startTransition } = usePageTransition();
     const hasImage = image.src.trim().length > 0;
     const hasVideo = videoUrl.trim().length > 0;
+    const visibleTags =
+        tags.length > MAX_VISIBLE_TAGS
+            ? [...tags.slice(0, MAX_VISIBLE_TAGS), `+${tags.length - MAX_VISIBLE_TAGS}`]
+            : tags;
 
     return (
         <article data-id={id} className={classNames(styles["post-card"])} {...otherProps}>
@@ -71,7 +77,9 @@ const PostCard: FC<PostCardProps> = ({
                     />
                 )}
             </div>
-            <Tags tags={tags} />
+            <div className={styles["post-card__tags"]}>
+                <Tags tags={visibleTags} />
+            </div>
         </article>
     );
 };

@@ -52,6 +52,16 @@
         }
     }
 
+    &__subtitle {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+
+        min-height: 3.3em;
+    }
+
     &__media {
         @include default-tr;
 
@@ -105,7 +115,13 @@
 
         position: relative;
 
-        display: inline;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+
+        min-height: 2.4em;
 
         background-image: linear-gradient(currentcolor, currentcolor);
         background-repeat: no-repeat;
@@ -125,6 +141,10 @@
             z-index: 2;
             inset: 0;
         }
+    }
+
+    &__tags {
+        min-height: 8.6rem;
     }
 
     &:hover:not(.post-card--expanded) {
