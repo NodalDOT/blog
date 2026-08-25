@@ -46,7 +46,10 @@
         }
 
         @include mobile {
-            gap: 0.8rem;
+            flex-direction: column;
+            gap: 1.6rem;
+            align-items: stretch;
+            justify-content: flex-start;
         }
     }
 
