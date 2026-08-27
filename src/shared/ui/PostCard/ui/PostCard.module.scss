@@ -111,8 +111,6 @@
     }
 
     &__title {
-        @include default-tr;
-
         position: relative;
 
         overflow: hidden;
@@ -122,6 +120,12 @@
         line-clamp: 2;
 
         min-height: 2.4em;
+    }
+
+    &__title-text {
+        @include default-tr;
+
+        display: inline;
 
         background-image: linear-gradient(currentcolor, currentcolor);
         background-repeat: no-repeat;
@@ -153,7 +157,7 @@
             transform: scale(1.1);
         }
 
-        .post-card__title {
+        .post-card__title-text {
             background-size: 100% 2px;
         }
     }

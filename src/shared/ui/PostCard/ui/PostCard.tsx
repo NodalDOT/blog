@@ -48,7 +48,9 @@ const PostCard: FC<PostCardProps> = ({
                 }}
                 className={styles["post-card__link"]}
             >
-                <h3 className={styles["post-card__title"]}>{title}</h3>
+                <h3 className={styles["post-card__title"]}>
+                    <span className={styles["post-card__title-text"]}>{title}</span>
+                </h3>
             </Link>
 
             {subtitle && <p className={styles["post-card__subtitle"]}>{subtitle}</p>}
