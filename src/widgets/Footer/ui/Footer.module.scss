@@ -50,6 +50,10 @@
         align-items: center;
         justify-content: center;
 
+        @include mobile {
+            --btn-padding: 1rem;
+        }
+
         &::after {
             @include default-tr;
 

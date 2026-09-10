@@ -34,6 +34,10 @@
 
     transition-property: color, background-color;
 
+    @include mobile {
+        --btn-padding: 1.4rem 2rem;
+    }
+
     &::before {
         @include default-tr;
 
@@ -92,7 +96,7 @@
         }
 
         @include mobile {
-            @include box(1.6rem);
+            @include box(2rem);
         }
 
         > svg {
