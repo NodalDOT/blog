@@ -72,7 +72,7 @@
 
             button {
                 @include default-tr;
-                @include font-size(button);
+                @include font-size(body-semibold);
 
                 width: 100%;
                 padding: 0.6rem 1rem;
@@ -91,10 +91,6 @@
                 &.selected {
                     pointer-events: none;
                     opacity: 0.5;
-                }
-
-                @include mobile {
-                    font-size: 1.6rem;
                 }
             }
         }
