@@ -43,10 +43,8 @@ export const Workspace: FC = () => {
     const codeRef = useRef<HTMLElement>(null);
     const pupilRef = useRef<SVGGElement>(null);
     const lidRef = useRef<SVGRectElement>(null);
-    const codeContainerRef = useRef<HTMLDivElement>(null);
 
     const rafRef = useRef<number | null>(null);
-    const layoutRafRef = useRef<number | null>(null);
     const blinkTweenRef = useRef<gsap.core.Tween | null>(null);
     const blinkDelayRef = useRef<gsap.core.Tween | null>(null);
     const pupilTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -88,28 +86,6 @@ export const Workspace: FC = () => {
         addChar();
     };
 
-    const prepareCodeLayout = () => {
-        if (!codeRef.current || !codeContainerRef.current) return;
-
-        codeRef.current.innerHTML = Prism.highlight(
-            FULL_SOURCE_CODE,
-            assertDefined(Prism.languages["javascript"], "Prism javascript grammar is required"),
-            "javascript"
-        );
-
-        layoutRafRef.current = requestAnimationFrame(() => {
-            if (!codeContainerRef.current) return;
-
-            const height = codeContainerRef.current.scrollHeight;
-            codeContainerRef.current.style.height = `${height}px`;
-
-            if (codeRef.current) {
-                codeRef.current.innerHTML = "";
-            }
-            layoutRafRef.current = null;
-        });
-    };
-
     const handleScreenClick = () => {
         typeWriter();
 
@@ -132,11 +108,7 @@ export const Workspace: FC = () => {
 
     useGSAP(
         () => {
-            prepareCodeLayout();
-
-            requestAnimationFrame(() => {
-                typeWriter();
-            });
+            typeWriter();
 
             if (!lidRef.current || !pupilRef.current) return;
 
@@ -179,10 +151,6 @@ export const Workspace: FC = () => {
                     cancelAnimationFrame(rafRef.current);
                 }
 
-                if (layoutRafRef.current) {
-                    cancelAnimationFrame(layoutRafRef.current);
-                }
-
                 blinkTweenRef.current?.kill();
                 blinkDelayRef.current?.kill();
                 pupilTweenRef.current?.kill();
@@ -223,8 +191,15 @@ export const Workspace: FC = () => {
                         onClick={handleScreenClick}
                         onKeyDown={(event) => handleActionKeyDown(event, handleScreenClick)}
                     >
-                        <div ref={codeContainerRef} className={styles["workspace__code-container"]}>
-                            <pre>
+                        <div className={styles["workspace__code-container"]}>
+                            {/* Invisible copy of the full snippet. It reserves exactly the
+                                height the typed text will need at any width, so the layout
+                                never depends on a JS measurement. */}
+                            <pre className={styles["workspace__code-sizer"]} aria-hidden="true">
+                                {FULL_SOURCE_CODE}
+                            </pre>
+
+                            <pre className={styles["workspace__code-typed"]}>
                                 <code ref={codeRef} className="language-javascript" />
                             </pre>
                         </div>

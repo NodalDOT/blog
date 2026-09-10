@@ -133,16 +133,23 @@
     }
 
     &__code-container {
+        position: relative;
+
         overflow: hidden;
 
         height: 100%;
-        padding: 2.4rem;
 
         font-family: "Fira Code", monospace;
         color: #f8f8f2;
 
+        pre,
+        code {
+            font: inherit;
+        }
+
         pre {
             margin: 0;
+            padding: 2.4rem;
             word-break: break-all;
             white-space: pre-wrap;
         }
@@ -166,6 +173,15 @@
         :global(.token.number) {
             color: #bd93f9;
         }
+    }
+
+    &__code-sizer {
+        visibility: hidden;
+    }
+
+    &__code-typed {
+        position: absolute;
+        inset: 0;
     }
 
     &__eye-widget {
