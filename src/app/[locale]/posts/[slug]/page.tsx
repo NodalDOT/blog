@@ -28,7 +28,6 @@ export async function generateMetadata({
     const source = fs.readFileSync(file, "utf8");
     const { data } = matter(source);
 
-    const tags: string[] = Array.isArray(data["tags"]) ? data["tags"] : [];
     const title = String(data["title"] ?? "");
     const subtitle = String(data["subtitle"] ?? title);
     const imageSrc = data["imageSrc"];
@@ -36,7 +35,6 @@ export async function generateMetadata({
     return createPageMetadata({
         title,
         description: subtitle,
-        keywords: tags.join(","),
         openGraphTitle: title,
         openGraphDescription: subtitle,
         ...(typeof imageSrc === "string" ? { openGraphImage: imageSrc } : {}),
@@ -58,6 +56,7 @@ type PostFrontmatter = Omit<Post, "image"> & {
 export default async function PostPage({ params }: PostPageProps) {
     const { locale, slug } = await params;
     const t = await getTranslations({ locale, namespace: "PostDetail" });
+    const tNav = await getTranslations({ locale, namespace: "Nav" });
 
     const file = path.join(process.cwd(), "content/posts", locale, `${slug}.mdx`);
     if (!fs.existsSync(file)) return notFound();
@@ -93,25 +92,52 @@ export default async function PostPage({ params }: PostPageProps) {
     const imageUrl = resolveAbsoluteAssetUrl(baseSeo.url, post.image.src);
     const jsonLd = {
         "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        headline: post.title,
-        description: post.subtitle || post.title,
-        image: [imageUrl],
-        url: postUrl,
-        mainEntityOfPage: postUrl,
-        inLanguage: locale,
-        datePublished: new Date(post.date).toISOString(),
-        dateModified: new Date(post.date).toISOString(),
-        author: {
-            "@type": "Person",
-            name: "NodalDOT",
-            url: `${baseSeo.url}/${locale}`,
-        },
-        publisher: {
-            "@type": "Person",
-            name: "NodalDOT",
-            url: `${baseSeo.url}/${locale}`,
-        },
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                headline: post.title,
+                description: post.subtitle || post.title,
+                image: [imageUrl],
+                url: postUrl,
+                mainEntityOfPage: postUrl,
+                inLanguage: locale,
+                datePublished: new Date(post.date).toISOString(),
+                dateModified: new Date(post.updated ?? post.date).toISOString(),
+                author: {
+                    "@type": "Person",
+                    name: "NodalDOT",
+                    url: `${baseSeo.url}/${locale}`,
+                },
+                publisher: {
+                    "@type": "Person",
+                    name: "NodalDOT",
+                    url: `${baseSeo.url}/${locale}`,
+                },
+            },
+            {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                    {
+                        "@type": "ListItem",
+                        position: 1,
+                        name: tNav("home"),
+                        item: `${baseSeo.url}/${locale}`,
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 2,
+                        name: tNav("posts"),
+                        item: `${baseSeo.url}/${locale}/posts`,
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 3,
+                        name: post.title,
+                        item: postUrl,
+                    },
+                ],
+            },
+        ],
     };
 
     return (

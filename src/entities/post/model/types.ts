@@ -6,4 +6,5 @@ export interface Post {
     videoUrl: string;
     tags: string[];
     date: string;
+    updated?: string;
 }

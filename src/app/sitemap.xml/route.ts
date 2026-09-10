@@ -11,7 +11,7 @@ type SitemapEntry = {
 };
 
 function formatLastModified(date: Date) {
-    return date.toISOString().split("T")[0];
+    return date.toISOString().slice(0, 10);
 }
 
 function escapeXml(value: string) {
@@ -23,22 +23,36 @@ function escapeXml(value: string) {
         .replaceAll("'", "&apos;");
 }
 
+function getLatestPostDate(locale: string) {
+    return readPostFrontmatters(locale).reduce<string | undefined>((latest, post) => {
+        const date = post.updated ?? post.date;
+        return !latest || date > latest ? date : latest;
+    }, undefined);
+}
+
 function getStaticEntries() {
-    return routing.locales.flatMap((locale) =>
-        STATIC_PATHS.map(
-            (pagePath) =>
-                ({
-                    url: `${SITE_URL}/${locale}${pagePath}`,
-                }) satisfies SitemapEntry
-        )
-    );
+    return routing.locales.flatMap((locale) => {
+        const latest = getLatestPostDate(locale);
+
+        return STATIC_PATHS.map((pagePath) => {
+            // The listing pages change whenever a post does; /about has no such signal.
+            const tracksPosts = pagePath !== "/about";
+
+            return {
+                url: `${SITE_URL}/${locale}${pagePath}`,
+                ...(latest && tracksPosts
+                    ? { lastModified: formatLastModified(new Date(latest)) }
+                    : {}),
+            } satisfies SitemapEntry;
+        });
+    });
 }
 
 function getPostEntries() {
     return routing.locales.flatMap((locale) => {
         return readPostFrontmatters(locale).map((post) => ({
             url: `${SITE_URL}/${locale}/posts/${post.id}`,
-            lastModified: formatLastModified(new Date(post.date)),
+            lastModified: formatLastModified(new Date(post.updated ?? post.date)),
         }));
     });
 }
@@ -49,15 +63,13 @@ export function GET() {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries
-    .map(
-        ({ url, lastModified }) => `  <url>
-    <loc>${escapeXml(url)}</loc>
-${
-    lastModified
-        ? `    <lastmod>${lastModified}</lastmod>
-`
-        : ""
-}   </url>`
+    .map(({ url, lastModified }) =>
+        [
+            "  <url>",
+            `    <loc>${escapeXml(url)}</loc>`,
+            ...(lastModified ? [`    <lastmod>${lastModified}</lastmod>`] : []),
+            "  </url>",
+        ].join("\n")
     )
     .join("\n")}
 </urlset>`;

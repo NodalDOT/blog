@@ -119,16 +119,13 @@
     "Metadata": {
         "title": "NodalDOT блог",
         "description": "NodalDOT блог. Портфолио, заметки о работе и проектах.",
-        "keywords": "Фронтенд разработчик,React,Next.js,TypeScript,Портфолио,Веб-разработка,UI,Производительность",
         "About": {
             "title": "Обо мне — NodalDOT",
-            "description": "Фронтенд разработчик, специализирующийся на создании производительных и доступных интерфейсов. React, Next.js, TypeScript.",
-            "keywords": "Обо мне,Фронтенд разработчик,React,Next.js,TypeScript,Производительность,Доступность,Портфолио"
+            "description": "Фронтенд разработчик, специализирующийся на создании производительных и доступных интерфейсов. React, Next.js, TypeScript."
         },
         "Posts": {
             "title": "Посты — NodalDOT блог",
-            "description": "Статьи о React, Next.js, TypeScript, архитектуре UI и современной фронтенд разработке.",
-            "keywords": "Блог,Посты,React,Next.js,TypeScript,Фронтенд,Статьи,Веб-разработка,UI"
+            "description": "Статьи о React, Next.js, TypeScript, архитектуре UI и современной фронтенд разработке."
         }
     }
 }

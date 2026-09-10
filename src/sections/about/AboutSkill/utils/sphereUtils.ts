@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import { assertDefined } from "@/shared/lib/assert";
+import { SKILLS } from "./skills";
 
 export type SkillPoint = {
     position: Vector3;
@@ -20,22 +21,6 @@ export const CONFIG = {
     MOUSE_ROTATION_ENABLED: true,
     CLICK_ANIMATION_DURATION: 1500,
 };
-
-export const SKILLS = [
-    { icon: "/assets/sprites/html.svg", name: "HTML" },
-    { icon: "/assets/sprites/css.svg", name: "CSS" },
-    { icon: "/assets/sprites/js.svg", name: "JavaScript" },
-    { icon: "/assets/sprites/react.svg", name: "React" },
-    { icon: "/assets/sprites/ts.svg", name: "TypeScript" },
-    { icon: "/assets/sprites/git.svg", name: "Git" },
-    { icon: "/assets/sprites/node.svg", name: "Node" },
-    { icon: "/assets/sprites/redux.svg", name: "Redux" },
-    { icon: "/assets/sprites/sass.svg", name: "Sass" },
-    { icon: "/assets/sprites/webpack.svg", name: "Webpack" },
-    { icon: "/assets/sprites/nextjs.svg", name: "Next.js" },
-    { icon: "/assets/sprites/jest.svg", name: "Jest" },
-    { icon: "/assets/sprites/vite.svg", name: "Vite" },
-];
 
 export function generateGoldenSphereCube(count: number): Vector3[] {
     const positions: Vector3[] = [];

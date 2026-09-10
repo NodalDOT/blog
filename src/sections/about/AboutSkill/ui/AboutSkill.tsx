@@ -32,7 +32,12 @@ export const AboutSkill: FC = () => {
                 <>
                     {!isCanvasReady && <Skeleton />}
 
+                    {/* Text alternative for the canvas: the skill names only exist as
+                        WebGL textures, so crawlers and screen readers need them here. */}
+                    <SkillsFallback visuallyHidden />
+
                     <div
+                        aria-hidden="true"
                         className={classNames(
                             styles["about-skill__canvas-wrapper"],
                             !isCanvasReady && styles["about-skill__canvas-wrapper--hidden"]

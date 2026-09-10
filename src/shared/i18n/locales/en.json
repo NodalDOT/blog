@@ -119,16 +119,13 @@
     "Metadata": {
         "title": "NodalDOT blog",
         "description": "NodalDOT blog. Portfolio, notes about work and projects.",
-        "keywords": "Frontend Developer,React,Next.js,TypeScript,Portfolio,Web Development,UI,Performance",
         "About": {
             "title": "About — NodalDOT",
-            "description": "Frontend developer specializing in high-performance, accessible interfaces built with React, Next.js and TypeScript.",
-            "keywords": "About,Frontend Developer,React,Next.js,TypeScript,Performance,Accessibility,Portfolio"
+            "description": "Frontend developer specializing in high-performance, accessible interfaces built with React, Next.js and TypeScript."
         },
         "Posts": {
             "title": "Posts — NodalDOT blog",
-            "description": "Articles about React, Next.js, TypeScript, UI architecture, and modern frontend engineering.",
-            "keywords": "Blog,Posts,React,Next.js,TypeScript,Frontend,Articles,Web Development,UI"
+            "description": "Articles about React, Next.js, TypeScript, UI architecture, and modern frontend engineering."
         }
     }
 }

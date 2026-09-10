@@ -8,7 +8,6 @@ import { assertDefined } from "@/shared/lib/assert";
 interface PageSEOParams {
     title: string;
     description: string;
-    keywords?: string;
     openGraphTitle?: string;
     openGraphDescription?: string;
     openGraphImage?: string;
@@ -20,7 +19,6 @@ interface PageSEOParams {
 export async function createPageMetadata({
     title,
     description,
-    keywords = "",
     openGraphTitle,
     openGraphDescription,
     openGraphImage,
@@ -57,10 +55,7 @@ export async function createPageMetadata({
     );
 
     return {
-        title: {
-            default: title,
-            template: `%s | NodalDOT`,
-        },
+        title,
         manifest: `/api/manifest?locale=${locale}`,
         description,
         metadataBase: new URL(base.url),
@@ -68,10 +63,6 @@ export async function createPageMetadata({
             canonical: path,
             languages: localizedAlternates,
         },
-        keywords: keywords
-            .split(",")
-            .map((k) => k.trim())
-            .filter(Boolean),
         robots: {
             index: true,
             follow: true,

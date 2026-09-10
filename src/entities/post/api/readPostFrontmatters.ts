@@ -13,6 +13,7 @@ export interface PostFrontmatter {
     videoUrl: string;
     tags: string[];
     date: string;
+    updated?: string;
 }
 
 export function readPostFrontmatters(locale: string): PostFrontmatter[] {
@@ -38,6 +39,7 @@ export function readPostFrontmatters(locale: string): PostFrontmatter[] {
                     ? data["tags"].filter((tag): tag is string => typeof tag === "string")
                     : [],
                 date: String(data["date"] ?? ""),
+                ...(data["updated"] ? { updated: String(data["updated"]) } : {}),
             } satisfies PostFrontmatter;
         });
 }

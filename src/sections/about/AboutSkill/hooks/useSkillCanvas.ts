@@ -86,7 +86,7 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
 
         const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
         const hwConcurrency = navigator.hardwareConcurrency ?? Infinity;
-        // Гейт по возможностям устройства стоит в AboutSkill: сюда доходим только если анимация разрешена.
+        // AboutSkill gates on device capability, so the canvas only mounts when animation is allowed.
         let enableAnimation = true;
 
         // --- scene ---
