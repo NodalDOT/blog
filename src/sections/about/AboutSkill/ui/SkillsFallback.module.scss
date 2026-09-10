@@ -1,0 +1,32 @@
+@use "@/shared/styles/utils/index" as *;
+
+.skills-fallback {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem;
+    justify-content: center;
+
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    &__item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: center;
+
+        padding: 1.6rem 2rem;
+        border-radius: 1.2rem;
+
+        color: var(--text-contrast-color);
+
+        background: var(--background-contrast-color);
+
+        > span {
+            @include font-size(body-bold);
+        }
+    }
+}

@@ -13,6 +13,7 @@
     --text-2-color: #5f6670;
     --skill-line-color: rgb(0 0 0 / 5%);
     --skill-line-active-color: rgb(0 128 255 / 25%);
+    --skill-line-front-color: rgb(0 128 255 / 40%);
 }
 
 [data-theme="dark"] {
@@ -29,4 +30,5 @@
     --text-2-color: #a7b0bc;
     --skill-line-color: rgb(255 255 255 / 5%);
     --skill-line-active-color: rgb(0 200 255 / 25%);
+    --skill-line-front-color: rgb(0 200 255 / 40%);
 }

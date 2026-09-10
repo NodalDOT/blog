@@ -1,7 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
-import * as THREE from "three";
+import {
+    AmbientLight,
+    BufferGeometry,
+    CanvasTexture,
+    Group,
+    Line,
+    LinearFilter,
+    LineBasicMaterial,
+    PerspectiveCamera,
+    PointLight,
+    Quaternion,
+    Raycaster,
+    RepeatWrapping,
+    Scene,
+    Sprite,
+    SpriteMaterial,
+    Vector2,
+    Vector3,
+    WebGLRenderer,
+} from "three";
 import { assertDefined } from "@/shared/lib/assert";
 import {
     generateGoldenSphereCube,
@@ -34,12 +53,12 @@ const readColor = (name: string, fallback: string) => {
     return parseInt(v.replace(/^#/, "0x"), 16);
 };
 
-const makeCurvedGeometry = (a: THREE.Vector3, b: THREE.Vector3) => {
+const makeCurvedGeometry = (a: Vector3, b: Vector3) => {
     const v1 = a.clone().normalize();
     const v2 = b.clone().normalize();
     const dot = Math.min(Math.max(v1.dot(v2), -1), 1);
     const theta = Math.acos(dot);
-    const pts: THREE.Vector3[] = [];
+    const pts: Vector3[] = [];
     if (theta < 1e-4) {
         pts.push(a.clone(), b.clone());
     } else {
@@ -49,7 +68,7 @@ const makeCurvedGeometry = (a: THREE.Vector3, b: THREE.Vector3) => {
             const w1 = Math.sin((1 - t) * theta) / sinTheta;
             const w2 = Math.sin(t * theta) / sinTheta;
             pts.push(
-                new THREE.Vector3(
+                new Vector3(
                     (v1.x * w1 + v2.x * w2) * CONFIG.RADIUS,
                     (v1.y * w1 + v2.y * w2) * CONFIG.RADIUS,
                     (v1.z * w1 + v2.z * w2) * CONFIG.RADIUS
@@ -57,7 +76,7 @@ const makeCurvedGeometry = (a: THREE.Vector3, b: THREE.Vector3) => {
             );
         }
     }
-    return new THREE.BufferGeometry().setFromPoints(pts);
+    return new BufferGeometry().setFromPoints(pts);
 };
 
 export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
@@ -66,25 +85,22 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
         if (!canvas) return;
 
         const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-        const prefersReducedMotion =
-            window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-        const deviceMemory =
-            (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? Infinity;
         const hwConcurrency = navigator.hardwareConcurrency ?? Infinity;
-        let enableAnimation = !prefersReducedMotion && deviceMemory >= 1.5 && hwConcurrency > 2;
+        // Гейт по возможностям устройства стоит в AboutSkill: сюда доходим только если анимация разрешена.
+        let enableAnimation = true;
 
         // --- scene ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const scene = new Scene();
+        const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
         camera.position.z = 8;
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(0x000000, 0);
 
-        const group = new THREE.Group();
+        const group = new Group();
         scene.add(group);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-        const pointLight = new THREE.PointLight(0xffffff, 0.9);
+        scene.add(new AmbientLight(0xffffff, 0.7));
+        const pointLight = new PointLight(0xffffff, 0.9);
         pointLight.position.set(10, 10, 15);
         scene.add(pointLight);
 
@@ -92,46 +108,65 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
         const skillPoints = createSkillPoints(generateGoldenSphereCube(CONFIG.SPHERE_POINT_COUNT));
         const neighborIndices = findNearestNeighbors(skillPoints);
 
-        const particles: THREE.Sprite[] = [];
-        const lines: THREE.Line[] = [];
+        const particles: Sprite[] = [];
+        const lines: Line[] = [];
+        let texturesCancelled = false;
 
-        skillPoints.forEach(async (skillPoint, index) => {
-            const tex = new THREE.CanvasTexture(await createSvgTexture(skillPoint.svgUrl));
-            tex.magFilter = THREE.LinearFilter;
-            tex.minFilter = THREE.LinearFilter;
-            tex.flipY = false;
-            tex.center.set(0.5, 0.5);
-            tex.rotation = Math.PI;
-            tex.wrapS = THREE.RepeatWrapping;
-            tex.repeat.x = -1;
-            tex.needsUpdate = true;
+        Promise.all(skillPoints.map((skillPoint) => createSvgTexture(skillPoint.svgUrl))).then(
+            (canvases) => {
+                if (texturesCancelled) return;
 
-            const material = new THREE.SpriteMaterial({
-                map: tex,
-                sizeAttenuation: true,
-                opacity: 0.8,
-            });
-            material.userData = { baseOpacity: 0.8 };
-            const sprite = new THREE.Sprite(material);
-            sprite.position.copy(skillPoint.position);
-            sprite.scale.set(CONFIG.ICON_SIZE, CONFIG.ICON_SIZE, 1);
-            sprite.userData = { skillPoint, index };
-            group.add(sprite);
-            particles.push(sprite);
+                canvases.forEach((canvasEl, index) => {
+                    const tex = new CanvasTexture(canvasEl);
+                    const skillPoint = assertDefined(skillPoints[index], "Skill point is required");
+
+                    tex.magFilter = LinearFilter;
+                    tex.minFilter = LinearFilter;
+                    tex.flipY = false;
+                    tex.center.set(0.5, 0.5);
+                    tex.rotation = Math.PI;
+                    tex.wrapS = RepeatWrapping;
+                    tex.repeat.x = -1;
+                    tex.needsUpdate = true;
+
+                    const material = new SpriteMaterial({
+                        map: tex,
+                        sizeAttenuation: true,
+                        opacity: 0.8,
+                    });
+                    material.userData = { baseOpacity: 0.8 };
+                    const sprite = new Sprite(material);
+                    sprite.position.copy(skillPoint.position);
+                    sprite.scale.set(CONFIG.ICON_SIZE, CONFIG.ICON_SIZE, 1);
+                    sprite.userData = { skillPoint, index };
+                    group.add(sprite);
+                    particles.push(sprite);
+                });
+            }
+        );
+
+        let cssLineColor = readColor("--skill-line-color", "#000000");
+        let cssLineActive = readColor("--skill-line-active-color", "#0080ff");
+        let cssLineFront = readColor("--skill-line-front-color", "#3388ff");
+
+        const themeObserver = new MutationObserver(() => {
+            cssLineColor = readColor("--skill-line-color", "#000000");
+            cssLineActive = readColor("--skill-line-active-color", "#0080ff");
+            cssLineFront = readColor("--skill-line-front-color", "#3388ff");
         });
-
-        const cssLineColor = readColor("--skill-line-color", "#000000");
-        const cssLineActive = readColor("--skill-line-active-color", "#0080ff");
-        const cssLineFront = readColor("--skill-line-front-color", "#3388ff");
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
 
         neighborIndices.forEach((neighbors, i) => {
             neighbors.forEach((j) => {
                 if (i >= j) return;
                 const startPoint = assertDefined(skillPoints[i], "Start skill point is required");
                 const endPoint = assertDefined(skillPoints[j], "End skill point is required");
-                const line = new THREE.Line(
+                const line = new Line(
                     makeCurvedGeometry(startPoint.position, endPoint.position),
-                    new THREE.LineBasicMaterial({
+                    new LineBasicMaterial({
                         color: cssLineColor,
                         transparent: true,
                         opacity: 0.6,
@@ -144,8 +179,8 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
         });
 
         // --- interaction state ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+        const raycaster = new Raycaster();
+        const mouse = new Vector2();
         let activeIndex = -1;
         let isMouseInside = false;
         let mouseDown = false;
@@ -153,8 +188,8 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
         let canvasScale = 1;
         const clickAnim = {
             active: false,
-            start: new THREE.Quaternion(),
-            target: new THREE.Quaternion(),
+            start: new Quaternion(),
+            target: new Quaternion(),
             startTime: 0,
         };
 
@@ -206,14 +241,8 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
             if (mouseDown) {
                 const dx = e.clientX - mouseDrag.x;
                 const dy = e.clientY - mouseDrag.y;
-                const qY = new THREE.Quaternion().setFromAxisAngle(
-                    new THREE.Vector3(0, 1, 0),
-                    dx * 0.01
-                );
-                const qX = new THREE.Quaternion().setFromAxisAngle(
-                    new THREE.Vector3(1, 0, 0),
-                    dy * 0.01
-                );
+                const qY = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), dx * 0.01);
+                const qX = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), dy * 0.01);
                 group.quaternion.multiply(qY).multiply(qX);
                 mouseDrag.x = e.clientX;
                 mouseDrag.y = e.clientY;
@@ -221,7 +250,7 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(particles);
-            const hovered = intersects[0]?.object as THREE.Sprite | undefined;
+            const hovered = intersects[0]?.object as Sprite | undefined;
             activeIndex = hovered ? (hovered.userData["index"] as number) : -1;
 
             if (tooltipRef.current) {
@@ -240,18 +269,15 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
             const rect = canvas.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
             const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+            raycaster.setFromCamera(new Vector2(x, y), camera);
             const intersects = raycaster.intersectObjects(particles);
             if (!intersects.length) return;
             const hovered = assertDefined(intersects[0], "Intersected sprite is required");
-            const sp = (hovered.object as THREE.Sprite).userData["skillPoint"] as SkillPoint;
+            const sp = (hovered.object as Sprite).userData["skillPoint"] as SkillPoint;
             const posNorm = sp.position.clone().normalize();
             clickAnim.active = true;
             clickAnim.start = group.quaternion.clone();
-            clickAnim.target = new THREE.Quaternion().setFromUnitVectors(
-                posNorm,
-                new THREE.Vector3(0, 0, 1)
-            );
+            clickAnim.target = new Quaternion().setFromUnitVectors(posNorm, new Vector3(0, 0, 1));
             clickAnim.startTime = Date.now();
         };
 
@@ -296,8 +322,8 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
                 if (p >= 1) clickAnim.active = false;
             } else if (!mouseDown) {
                 group.quaternion.multiply(
-                    new THREE.Quaternion().setFromAxisAngle(
-                        new THREE.Vector3(0, 1, 0),
+                    new Quaternion().setFromAxisAngle(
+                        new Vector3(0, 1, 0),
                         CONFIG.AUTO_ROTATION_SPEED
                     )
                 );
@@ -316,7 +342,7 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
                 const s = CONFIG.ICON_SIZE * (0.5 + depth * 0.5) * canvasScale;
                 sprite.scale.set(s, s, 1);
 
-                const material = sprite.material as THREE.SpriteMaterial;
+                const material = sprite.material as SpriteMaterial;
                 const baseOpacity =
                     (material.userData?.["baseOpacity"] as number | undefined) ?? 0.8;
                 const isCurrent = activeIndex === idx;
@@ -336,7 +362,7 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
             lines.forEach((line) => {
                 const startIdx = line.userData["startIdx"] as number;
                 const endIdx = line.userData["endIdx"] as number;
-                const material = line.material as THREE.LineBasicMaterial;
+                const material = line.material as LineBasicMaterial;
                 const isHovered =
                     activeIndex >= 0 && (startIdx === activeIndex || endIdx === activeIndex);
                 const bothFront = frontSet.has(startIdx) && frontSet.has(endIdx);
@@ -378,6 +404,8 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
         observer.observe(canvas);
 
         return () => {
+            texturesCancelled = true;
+
             canvas.removeEventListener("mousedown", handleMouseDown);
             canvas.removeEventListener("click", handleClick);
             canvas.removeEventListener("mouseenter", handleMouseEnter);
@@ -386,15 +414,16 @@ export function useSkillCanvas({ canvasRef, tooltipRef }: UseSkillCanvasProps) {
             window.removeEventListener("mousemove", handleMouseMove);
             ro.disconnect();
             observer.disconnect();
+            themeObserver.disconnect();
             stop();
 
             particles.forEach((s) => {
-                const m = s.material as THREE.SpriteMaterial;
+                const m = s.material as SpriteMaterial;
                 m.map?.dispose();
                 m.dispose();
             });
             lines.forEach((l) => {
-                (l.material as THREE.LineBasicMaterial).dispose();
+                (l.material as LineBasicMaterial).dispose();
                 l.geometry.dispose();
             });
             renderer.dispose();

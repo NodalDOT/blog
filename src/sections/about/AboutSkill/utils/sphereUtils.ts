@@ -1,8 +1,8 @@
-import * as THREE from "three";
+import { Vector3 } from "three";
 import { assertDefined } from "@/shared/lib/assert";
 
 export type SkillPoint = {
-    position: THREE.Vector3;
+    position: Vector3;
     name: string;
     svgUrl: string;
     canvasTexture?: HTMLCanvasElement;
@@ -37,8 +37,8 @@ export const SKILLS = [
     { icon: "/assets/sprites/vite.svg", name: "Vite" },
 ];
 
-export function generateGoldenSphereCube(count: number): THREE.Vector3[] {
-    const positions: THREE.Vector3[] = [];
+export function generateGoldenSphereCube(count: number): Vector3[] {
+    const positions: Vector3[] = [];
     const offset = 2 / count;
     const increment = Math.PI * (3 - Math.sqrt(5));
 
@@ -51,13 +51,13 @@ export function generateGoldenSphereCube(count: number): THREE.Vector3[] {
         const yPos = y * CONFIG.RADIUS;
         const z = Math.sin(phi) * r * CONFIG.RADIUS;
 
-        positions.push(new THREE.Vector3(x, yPos, z));
+        positions.push(new Vector3(x, yPos, z));
     }
 
     return positions;
 }
 
-export function createSkillPoints(positions: THREE.Vector3[]): SkillPoint[] {
+export function createSkillPoints(positions: Vector3[]): SkillPoint[] {
     return positions.map((position, i) => ({
         position,
         name: assertDefined(SKILLS[i % SKILLS.length], "Skill definition is required").name,
