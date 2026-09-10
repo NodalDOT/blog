@@ -24,7 +24,6 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
                 onReady?.();
                 requestAnimationFrame(() => swiper.update());
             }}
-            effect="coverflow"
             grabCursor
             centeredSlides
             initialSlide={1}

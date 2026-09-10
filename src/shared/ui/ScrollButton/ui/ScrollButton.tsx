@@ -22,6 +22,10 @@ export const ScrollButton: FC<ScrollButtonProps> = (props) => {
                 window.scrollTo({ top: y, behavior });
                 return;
             }
+
+            if (process.env.NODE_ENV !== "production") {
+                console.warn(`ScrollButton: target "${target}" not found, using fallback scroll.`);
+            }
         }
 
         window.scrollTo({

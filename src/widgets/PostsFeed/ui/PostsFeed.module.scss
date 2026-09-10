@@ -24,7 +24,7 @@
 
     &__description {
         margin: 0;
-        color: rgb(var(--white-rgb) / 72%);
+        color: var(--text-2-color);
     }
 
     @include tablet {
@@ -87,7 +87,7 @@
 
     &__empty {
         margin: 0;
-        color: rgb(var(--white-rgb) / 72%);
+        color: var(--text-2-color);
     }
 
     :global(.swiper-slide) {

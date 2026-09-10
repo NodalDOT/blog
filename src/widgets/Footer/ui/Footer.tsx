@@ -18,7 +18,7 @@ export async function Footer() {
             </span>
 
             <div className={styles["footer__scroll"]}>
-                <ScrollButton target="#top" offset={64}>
+                <ScrollButton>
                     <Button
                         leftIcon={<Icon name="arrow-up" />}
                         ariaLabel={t("scrollToTop")}
