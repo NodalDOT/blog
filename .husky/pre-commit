@@ -1,2 +1,2 @@
 #!/bin/sh
-pnpm fix:all
+pnpm exec lint-staged
