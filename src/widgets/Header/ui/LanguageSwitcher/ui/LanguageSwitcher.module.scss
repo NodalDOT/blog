@@ -96,6 +96,24 @@
         }
     }
 
+    @include mobile {
+        &__trigger {
+            padding: 0.8rem 1rem;
+        }
+
+        &__options {
+            top: calc(100% + 1rem);
+            padding: 0.8rem 0;
+            border-radius: 1.6rem;
+
+            li button {
+                min-width: 8rem;
+                padding: 1.2rem 1.6rem;
+                border-radius: 1.6rem;
+            }
+        }
+    }
+
     @media (hover: hover) and (pointer: fine) {
         &:hover &__options,
         &:focus-within &__options {
