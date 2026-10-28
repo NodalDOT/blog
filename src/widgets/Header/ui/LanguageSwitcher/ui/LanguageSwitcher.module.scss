@@ -70,15 +70,19 @@
         li {
             list-style: none;
 
-            button {
+            a {
                 @include default-tr;
                 @include font-size(body-semibold);
+
+                display: block;
 
                 width: 100%;
                 padding: 0.6rem 1rem;
                 border-radius: 1.2rem;
 
                 color: var(--text-color);
+                text-align: center;
+                text-decoration: none;
 
                 background-color: transparent;
 
