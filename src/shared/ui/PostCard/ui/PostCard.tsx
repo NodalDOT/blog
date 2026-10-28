@@ -62,6 +62,7 @@ const PostCard: FC<PostCardProps> = ({
                         alt={image.alt}
                         width={1200}
                         height={675}
+                        sizes="(max-width: 767px) 90vw, (max-width: 1023px) 45vw, 30vw"
                         className={styles["post-card__image"]}
                     />
                 )}
