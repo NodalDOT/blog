@@ -6,14 +6,8 @@ import Button from "@/shared/ui/Button";
 import { classNames } from "@/shared/lib/classNames";
 import { useTranslations } from "next-intl";
 import ScrollButton from "@/shared/ui/ScrollButton";
-import dynamic from "next/dynamic";
-import Skeleton from "@/shared/ui/Skeleton";
 import { Icon } from "@/shared/ui/Icon";
-
-const Eye = dynamic(() => import("./Eye"), {
-    ssr: false,
-    loading: () => <Skeleton />,
-});
+import Eye from "./Eye";
 
 export const MainHero: FC = () => {
     const t = useTranslations("HomePage.MainHero");
