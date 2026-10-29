@@ -92,4 +92,12 @@
             justify-self: end;
         }
     }
+
+    &__contacts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.8rem;
+        align-items: baseline;
+        justify-content: center;
+    }
 }
