@@ -14,19 +14,17 @@
     color: var(--text-color);
 
     @include tablet {
-        padding: 1.6rem 4rem;
-    }
-
-    @include mobile {
         display: flex;
         flex-direction: column;
+        gap: 0.8rem;
+
+        padding: 1.6rem 4rem;
+
+        text-align: center;
     }
 
     @include mobile {
-        grid-template-columns: 1fr;
-        gap: 0.8rem;
         padding: 1.6rem 0;
-        text-align: center;
     }
 
     &__scroll {
