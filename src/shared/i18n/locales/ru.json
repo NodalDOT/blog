@@ -19,7 +19,8 @@
             "buttonAria": "Перейти в посты"
         },
         "AboutSkill": {
-            "title": "Мои навыки"
+            "title": "Мои навыки",
+            "hint": "Наведи на навык"
         },
         "AboutPath": {
             "title": "Мой путь",

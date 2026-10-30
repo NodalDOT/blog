@@ -195,6 +195,10 @@
         border-radius: 50%;
     }
 
+    &__eye-widget svg {
+        clip-path: ellipse(45% 28% at 50% 50%);
+    }
+
     &__eye-ball {
         fill: var(--eye-white);
     }

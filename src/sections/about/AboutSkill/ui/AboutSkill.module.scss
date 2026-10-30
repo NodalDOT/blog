@@ -3,46 +3,314 @@
 .about-skill {
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 3.2rem;
     align-items: center;
 
-    &__canvas-wrapper {
-        position: relative;
+    @include mobile {
+        gap: 2rem;
+    }
+
+    &__stage {
+        display: grid;
+        grid-template-columns: minmax(0, 44rem) minmax(0, 1fr);
+        gap: 4rem;
+        align-items: center;
+
         width: 100%;
-        height: calc(100dvh - 8rem);
-        margin: 0 auto;
 
         @include tablet {
-            aspect-ratio: 1;
-            height: auto;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 2.4rem;
         }
     }
 
-    &__canvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-        border-radius: 2.4rem;
+    &__eye {
+        position: sticky;
+        top: calc(var(--header-height) + 2rem);
+
+        display: flex;
+        flex-direction: column;
+        gap: 2.4rem;
+        align-items: center;
+        justify-content: center;
+
+        aspect-ratio: 1;
+        padding: 4rem 3.2rem;
+        border-radius: 1.2rem;
+
+        background-color: var(--background-contrast-color);
+
+        @include tablet {
+            z-index: 2;
+            top: 0.8rem;
+            aspect-ratio: auto;
+            padding: 3.2rem 2.4rem;
+        }
+
+        @include mobile {
+            gap: 1.2rem;
+            padding: 1.6rem;
+        }
     }
 
-    &__tooltip {
+    &__face {
+        position: relative;
+
+        container-type: inline-size;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+
+        aspect-ratio: 5 / 3;
+        width: min(80%, 30rem);
+
+        @include mobile {
+            width: 40%;
+        }
+    }
+
+    &__lashes {
         pointer-events: none;
 
-        position: fixed;
-        z-index: 3;
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 40%;
 
-        display: none;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
 
-        padding: 0.4rem 0.8rem;
-        border-radius: 0.8rem;
+        visibility: hidden;
 
-        color: var(--text-contrast-color);
-        white-space: nowrap;
+        transition: scale 0.6s ease;
+        animation: about-skill-lashes-blink 6s infinite;
 
-        background: var(--background-contrast-color);
+        > span {
+            position: absolute;
 
-        @include tablet {
-            display: none;
+            width: 6cqw;
+            height: 20cqw;
+            border-radius: 10cqw;
+
+            background-color: var(--text-contrast-color);
+
+            &:nth-child(1) {
+                top: 13.3cqw;
+            }
+
+            &:nth-child(2) {
+                top: 18.7cqw;
+                transform: translateX(-33.3cqw) rotate(-45deg);
+            }
+
+            &:nth-child(3) {
+                top: 18.7cqw;
+                transform: translateX(33.3cqw) rotate(45deg);
+            }
         }
+    }
+
+    &__sclera {
+        @include default-tr($duration: 0.6s);
+
+        position: relative;
+
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+
+        clip-path: ellipse(50% 50% at 50% 50%);
+
+        transition-property: clip-path;
+        animation: about-skill-blink 6s infinite;
+
+        @include eye-sclera-volume(60cqw);
+    }
+
+    &__pupil {
+        flex-shrink: 0;
+
+        @include eye-pupil-volume;
+
+        aspect-ratio: 1;
+        width: 40%;
+        border-radius: 50%;
+
+        animation: about-skill-pupil-blink 6s infinite;
+    }
+
+    &__eye--focused {
+        .about-skill__sclera {
+            clip-path: ellipse(50% 44% at 50% 50%);
+        }
+
+        .about-skill__lashes {
+            scale: 1 0.75;
+        }
+    }
+
+    &__caption {
+        @include font-size(h3);
+
+        min-height: 1.2em;
+
+        @include mobile {
+            @include font-size(h4);
+        }
+
+        margin: 0;
+        color: var(--text-contrast-color);
+        text-align: center;
+    }
+
+    &__caption-text {
+        display: inline-block;
+        animation: about-skill-caption-in 0.35s ease-out;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+        gap: 1.2rem;
+
+        margin: 0;
+        padding: 0;
+
+        list-style: none;
+
+        @include mobile {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.8rem;
+        }
+    }
+
+    &__item {
+        @include default-tr;
+
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+
+        height: 100%;
+        padding: 1.6rem 1.2rem;
+        border: 1px solid var(--text-color);
+        border-radius: 1.2rem;
+
+        color: inherit;
+        text-decoration: none;
+
+        transition-property: transform, background-color, color;
+
+        &:focus-visible {
+            outline: 2px solid var(--text-color);
+            outline-offset: 4px;
+        }
+
+        &[data-active="true"] {
+            transform: translateY(-0.4rem);
+            color: var(--text-contrast-color);
+            background-color: var(--background-contrast-color);
+        }
+
+        @include mobile {
+            padding: 1.2rem 0.4rem;
+        }
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @include box(5.2rem);
+
+        border-radius: 50%;
+
+        background-color: #f5f5f5;
+
+        > img {
+            @include box(3.2rem);
+        }
+
+        @include mobile {
+            @include box(4.4rem);
+
+            > img {
+                @include box(2.6rem);
+            }
+        }
+    }
+
+    &__name {
+        @include font-size(body-bold);
+
+        overflow: hidden;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__sclera,
+        &__pupil,
+        &__lashes,
+        &__caption-text {
+            animation: none;
+        }
+
+        &__pupil,
+        &__sclera,
+        &__item {
+            transition: none;
+        }
+    }
+}
+
+@keyframes about-skill-blink {
+    0%,
+    94%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    96.5% {
+        transform: scaleY(0.04);
+    }
+}
+
+@keyframes about-skill-lashes-blink {
+    0%,
+    94%,
+    100% {
+        translate: 0 0;
+    }
+
+    96.5% {
+        translate: 0 32cqw;
+    }
+}
+
+@keyframes about-skill-caption-in {
+    from {
+        translate: 0 0.4em;
+        opacity: 0;
+    }
+}
+
+@keyframes about-skill-pupil-blink {
+    0%,
+    94%,
+    100% {
+        opacity: 1;
+    }
+
+    96.5% {
+        opacity: 0;
     }
 }

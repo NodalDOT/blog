@@ -19,7 +19,8 @@
             "buttonAria": "Go to posts"
         },
         "AboutSkill": {
-            "title": "My skills"
+            "title": "My skills",
+            "hint": "Hover a skill"
         },
         "AboutPath": {
             "title": "My Journey",
