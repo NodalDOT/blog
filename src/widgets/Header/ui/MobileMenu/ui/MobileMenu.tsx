@@ -5,7 +5,7 @@ import styles from "./MobileMenu.module.scss";
 import Link from "@/shared/ui/Link";
 import { usePathname } from "@/shared/i18n/navigation";
 import Modal, { useModal } from "@/shared/ui/Modal";
-import { usePageTransition } from "@/app/providers/transition";
+import { usePageTransitionActions } from "@/app/providers/transition";
 import { classNames } from "@/shared/lib/classNames";
 import { useTranslations } from "next-intl";
 
@@ -18,7 +18,7 @@ export const MobileMenu: FC<MobileMenuProps> = (props) => {
     const { links, ariaLabel } = props;
     const { open, toggleModal, closeModal } = useModal();
     const pathname = usePathname();
-    const { startTransition } = usePageTransition();
+    const { startTransition } = usePageTransitionActions();
     const t = useTranslations("MobileMenu");
 
     return (

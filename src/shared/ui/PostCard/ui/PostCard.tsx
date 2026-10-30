@@ -6,7 +6,7 @@ import styles from "./PostCard.module.scss";
 import { Link } from "@/shared/i18n/navigation";
 import Tags from "@/shared/ui/Tags/index";
 import { classNames } from "@/shared/lib/classNames";
-import { usePageTransition } from "@/app/providers/transition";
+import { usePageTransitionActions } from "@/app/providers/transition";
 
 export type ViewMode = "compact" | "image" | "video";
 
@@ -31,7 +31,7 @@ const PostCard: FC<PostCardProps> = ({
     tags = [],
     ...otherProps
 }) => {
-    const { startTransition } = usePageTransition();
+    const { startTransition } = usePageTransitionActions();
     const hasImage = image.src.trim().length > 0;
     const hasVideo = videoUrl.trim().length > 0;
     const visibleTags =

@@ -2,7 +2,7 @@ import React, { type FC } from "react";
 import styles from "./InteractiveText.module.scss";
 import Button from "@/shared/ui/Button";
 import { useTranslations } from "next-intl";
-import { usePageTransition } from "@/app/providers/transition";
+import { usePageTransitionActions } from "@/app/providers/transition";
 
 const FillWord = ({ children }: { children: React.ReactNode }) => (
     <span className={styles["interactive-text__fill-word"]}>{children}</span>
@@ -10,7 +10,7 @@ const FillWord = ({ children }: { children: React.ReactNode }) => (
 
 export const InteractiveText: FC = () => {
     const t = useTranslations("AboutPage.interactiveText");
-    const { startTransition } = usePageTransition();
+    const { startTransition } = usePageTransitionActions();
 
     return (
         <div className={styles["interactive-text"]}>

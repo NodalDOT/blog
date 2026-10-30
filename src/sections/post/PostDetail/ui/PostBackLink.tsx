@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/shared/i18n/navigation";
-import { usePageTransition } from "@/app/providers/transition";
+import { usePageTransitionActions } from "@/app/providers/transition";
 import { Icon } from "@/shared/ui/Icon";
 import styles from "./PostDetail.module.scss";
 
@@ -10,7 +10,7 @@ interface PostBackLinkProps {
 }
 
 export const PostBackLink = ({ label }: PostBackLinkProps) => {
-    const { startTransition } = usePageTransition();
+    const { startTransition } = usePageTransitionActions();
 
     return (
         <Link

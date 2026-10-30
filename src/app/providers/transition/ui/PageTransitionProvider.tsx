@@ -16,14 +16,20 @@ import { useRouter, usePathname } from "@/shared/i18n/navigation";
 import { classNames } from "@/shared/lib/classNames";
 import styles from "./PageTransition.module.scss";
 
-interface IPageTransitionContextProps {
+interface IPageTransitionActions {
     startTransition: (to: string, locale?: string) => void;
+}
+
+interface IPageTransitionState {
     isPending: boolean;
     isAnimating: boolean;
 }
 
-const PageTransitionContext = createContext<IPageTransitionContextProps>({
+const PageTransitionActionsContext = createContext<IPageTransitionActions>({
     startTransition: () => {},
+});
+
+const PageTransitionStateContext = createContext<IPageTransitionState>({
     isPending: false,
     isAnimating: false,
 });
@@ -82,10 +88,8 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
         [pathname, push, startReactTransition]
     );
 
-    const contextValue = useMemo(
-        () => ({ startTransition, isPending, isAnimating }),
-        [startTransition, isPending, isAnimating]
-    );
+    const actionsValue = useMemo(() => ({ startTransition }), [startTransition]);
+    const stateValue = useMemo(() => ({ isPending, isAnimating }), [isPending, isAnimating]);
 
     const loaderPortal = mounted
         ? createPortal(
@@ -97,11 +101,21 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
         : null;
 
     return (
-        <PageTransitionContext.Provider value={contextValue}>
-            {children}
-            {loaderPortal}
-        </PageTransitionContext.Provider>
+        <PageTransitionActionsContext.Provider value={actionsValue}>
+            <PageTransitionStateContext.Provider value={stateValue}>
+                {children}
+                {loaderPortal}
+            </PageTransitionStateContext.Provider>
+        </PageTransitionActionsContext.Provider>
     );
 };
 
-export const usePageTransition = () => use(PageTransitionContext);
+export const usePageTransitionActions = () => use(PageTransitionActionsContext);
+export const usePageTransitionState = () => use(PageTransitionStateContext);
+
+export const usePageTransition = () => {
+    const actions = usePageTransitionActions();
+    const state = usePageTransitionState();
+
+    return useMemo(() => ({ ...actions, ...state }), [actions, state]);
+};

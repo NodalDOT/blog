@@ -5,7 +5,7 @@ import { usePathname } from "@/shared/i18n/navigation";
 import styles from "./Navigation.module.scss";
 import Link from "@/shared/ui/Link";
 import { classNames } from "@/shared/lib/classNames";
-import { usePageTransition } from "@/app/providers/transition";
+import { usePageTransitionActions } from "@/app/providers/transition";
 
 interface NavigationProps {
     links: Array<{ href: string; label: string }>;
@@ -15,7 +15,7 @@ interface NavigationProps {
 const NavigationComponent: FC<NavigationProps> = (props) => {
     const { links, ariaLabel } = props;
     const pathname = usePathname();
-    const { startTransition } = usePageTransition();
+    const { startTransition } = usePageTransitionActions();
     return (
         <nav className={classNames(styles["navigation"])} aria-label={ariaLabel}>
             <ul className={classNames(styles["navigation__list"])}>
