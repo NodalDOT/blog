@@ -20,6 +20,8 @@
     }
 
     &__socials {
+        contain: paint;
+        overflow-clip-margin: 8px;
         display: flex;
         gap: 1rem;
         justify-self: center;
