@@ -5,10 +5,6 @@ date: "2026-05-25"
 imageSrc: "/posts/images/1.jpg"
 imageAlt: "Nodal-dot blog preview"
 videoUrl: "/posts/videos/1.mp4"
-tags:
-    - Next.js
-    - Three.js
-    - FSD
 ---
 
 ## How It Started
@@ -69,9 +65,9 @@ The "My Journey" section on the About page uses a scrubbed GSAP `ScrollTrigger` 
 
 `PageTransitionProvider` renders a full-screen loader via a React portal. Navigation calls `startTransition(href)` instead of a direct link - the loader has time to appear before the new route renders.
 
-### Posts with Live Search and Tag Filtering
+### Posts with Live Search and Publication Order
 
-The Posts page has real-time search and tag filtering. Search input is debounced (300 ms) via the `useDebounce` hook - filtering only runs after a pause in typing, with no unnecessary re-renders on every keystroke.
+Posts are shown from newest to oldest by publication date. Search input is debounced (300 ms) via the `useDebounce` hook, so filtering runs after a pause in typing and preserves the publication order.
 
 ## i18n
 

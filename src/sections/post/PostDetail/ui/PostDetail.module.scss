@@ -325,13 +325,6 @@
         color: var(--text-2-color);
     }
 
-    &__hero-tags {
-        @include default-tr;
-
-        height: auto;
-        transition-property: height;
-    }
-
     &__content-layout {
         position: relative;
 

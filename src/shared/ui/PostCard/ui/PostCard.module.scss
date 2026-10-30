@@ -147,10 +147,6 @@
         }
     }
 
-    &__tags {
-        min-height: 8.6rem;
-    }
-
     &:hover:not(.post-card--expanded) {
         & .post-card__image,
         & .post-card__video {

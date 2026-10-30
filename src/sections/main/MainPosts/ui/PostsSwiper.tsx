@@ -26,7 +26,7 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
             }}
             grabCursor
             centeredSlides
-            initialSlide={1}
+            initialSlide={0}
             slidesPerView={3}
             spaceBetween={24}
             modules={[Pagination]}
@@ -59,7 +59,6 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
                             subtitle={post.subtitle}
                             image={post.image}
                             videoUrl={post.videoUrl}
-                            tags={post.tags}
                         />
                     </SwiperSlide>
                 );

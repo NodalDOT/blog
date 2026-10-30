@@ -1,6 +1,6 @@
 import type { Post } from "@/entities/post";
 import type { TocItem } from "../model/types";
-import Tags from "@/shared/ui/Tags";
+
 import styles from "./PostDetail.module.scss";
 import { classNames } from "@/shared/lib/classNames";
 import { PostScrollProgress } from "./PostScrollProgress";
@@ -43,10 +43,6 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                     {post.subtitle && (
                         <p className={styles["post-detail__subtitle"]}>{post.subtitle}</p>
                     )}
-
-                    <div className={styles["post-detail__hero-tags"]}>
-                        <Tags tags={post.tags} />
-                    </div>
                 </div>
             </header>
 

@@ -11,7 +11,7 @@ export interface PostFrontmatter {
     imageSrc: string;
     imageAlt: string;
     videoUrl: string;
-    tags: string[];
+
     date: string;
     updated?: string;
 }
@@ -35,11 +35,10 @@ export function readPostFrontmatters(locale: string): PostFrontmatter[] {
                 imageSrc: String(data["imageSrc"] ?? ""),
                 imageAlt: String(data["imageAlt"] ?? ""),
                 videoUrl: String(data["videoUrl"] ?? ""),
-                tags: Array.isArray(data["tags"])
-                    ? data["tags"].filter((tag): tag is string => typeof tag === "string")
-                    : [],
+
                 date: String(data["date"] ?? ""),
                 ...(data["updated"] ? { updated: String(data["updated"]) } : {}),
             } satisfies PostFrontmatter;
-        });
+        })
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

@@ -99,7 +99,7 @@
         "description": "Articles about React, Next.js, TypeScript, UI architecture, and modern frontend engineering.",
         "viewMode": "View",
         "viewModeAria": "Select view mode for posts",
-        "empty": "No posts found for the current filters.",
+        "empty": "No posts found for this search.",
         "modes": {
             "compact": "Compact",
             "image": "Image",

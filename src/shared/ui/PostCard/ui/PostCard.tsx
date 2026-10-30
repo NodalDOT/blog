@@ -4,13 +4,11 @@ import React, { type FC } from "react";
 import Image from "next/image";
 import styles from "./PostCard.module.scss";
 import { Link } from "@/shared/i18n/navigation";
-import Tags from "@/shared/ui/Tags/index";
+
 import { classNames } from "@/shared/lib/classNames";
 import { usePageTransitionActions } from "@/app/providers/transition";
 
 export type ViewMode = "compact" | "image" | "video";
-
-const MAX_VISIBLE_TAGS = 3;
 
 export interface PostCardProps {
     id: string;
@@ -18,7 +16,7 @@ export interface PostCardProps {
     subtitle: string;
     image: { src: string; alt: string };
     videoUrl: string;
-    tags: string[];
+
     style?: React.CSSProperties;
 }
 
@@ -28,16 +26,12 @@ const PostCard: FC<PostCardProps> = ({
     subtitle,
     image,
     videoUrl,
-    tags = [],
+
     ...otherProps
 }) => {
     const { startTransition } = usePageTransitionActions();
     const hasImage = image.src.trim().length > 0;
     const hasVideo = videoUrl.trim().length > 0;
-    const visibleTags =
-        tags.length > MAX_VISIBLE_TAGS
-            ? [...tags.slice(0, MAX_VISIBLE_TAGS), `+${tags.length - MAX_VISIBLE_TAGS}`]
-            : tags;
 
     return (
         <article data-id={id} className={classNames(styles["post-card"])} {...otherProps}>
@@ -79,9 +73,6 @@ const PostCard: FC<PostCardProps> = ({
                         tabIndex={-1}
                     />
                 )}
-            </div>
-            <div className={styles["post-card__tags"]}>
-                <Tags tags={visibleTags} />
             </div>
         </article>
     );

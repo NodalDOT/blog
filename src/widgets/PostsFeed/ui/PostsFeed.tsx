@@ -10,9 +10,7 @@ import Search from "@/shared/ui/Search";
 import { Select, type SelectOption } from "@/shared/ui/Select";
 import { usePostsFilter } from "@/features/posts/posts-filter";
 import { useTranslations } from "next-intl";
-import { TagsBar } from "./TagsBar";
 import { PostsGrid } from "./PostsGrid";
-import "swiper/css";
 
 interface PostsFeedProps {
     posts: Post[];
@@ -20,7 +18,7 @@ interface PostsFeedProps {
 
 const PostsFeed: FC<PostsFeedProps> = ({ posts }) => {
     const t = useTranslations("PostsFeed");
-    const { query, setQuery, selectedTags, toggleTag, allTags, visiblePosts } = usePostsFilter({
+    const { query, setQuery, visiblePosts } = usePostsFilter({
         posts,
     });
     const [viewMode, setViewMode] = useState<ViewMode>("image");
@@ -58,8 +56,6 @@ const PostsFeed: FC<PostsFeedProps> = ({ posts }) => {
                     ariaLabel={viewModeAria}
                 />
             </div>
-
-            <TagsBar allTags={allTags} selectedTags={selectedTags} onToggle={toggleTag} />
 
             {visiblePosts.length > 0 ? (
                 <PostsGrid posts={visiblePosts} viewMode={viewMode} />

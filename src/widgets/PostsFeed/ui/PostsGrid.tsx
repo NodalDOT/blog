@@ -41,7 +41,6 @@ const PostsGridComponent: FC<PostsGridProps> = ({ posts, viewMode }) => {
                     subtitle={post.subtitle}
                     image={post.image}
                     videoUrl={post.videoUrl}
-                    tags={post.tags}
                 />
             ))}
         </div>

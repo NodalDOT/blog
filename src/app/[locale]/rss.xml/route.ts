@@ -24,9 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ loc
     const baseUrl = BASE_SEO[locale].url;
     const feedUrl = `${baseUrl}/${locale}/rss.xml`;
     const siteUrl = `${baseUrl}/${locale}/posts`;
-    const posts = readPostFrontmatters(locale).sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    const posts = readPostFrontmatters(locale);
 
     const lastBuildDate = posts[0]?.date
         ? new Date(posts[0].date).toUTCString()

@@ -4,7 +4,7 @@ export interface Post {
     subtitle: string;
     image: { src: string; alt: string };
     videoUrl: string;
-    tags: string[];
+
     date: string;
     updated?: string;
 }

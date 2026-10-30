@@ -11,7 +11,7 @@ This is my personal website and portfolio blog. It has both English and Russian 
 
 - localized pages and blog posts
 - MDX-based content
-- post search and tag filtering
+- post search and newest-first publication order
 - custom page transitions
 - interactive sections built with `Three.js` and `GSAP`
 - centralized SEO metadata

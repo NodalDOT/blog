@@ -7,7 +7,7 @@ export async function getPosts(locale: string) {
         subtitle: post.subtitle,
         image: { src: post.imageSrc, alt: post.imageAlt },
         videoUrl: post.videoUrl,
-        tags: post.tags,
+
         date: post.date,
     }));
 }
