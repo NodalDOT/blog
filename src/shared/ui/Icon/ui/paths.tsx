@@ -13,7 +13,10 @@ export type IconName =
     | "arrow-down"
     | "arrow-left"
     | "sun"
-    | "moon";
+    | "moon"
+    | "list"
+    | "image"
+    | "video";
 
 export const ICON_PATHS: Record<IconName, ReactNode> = {
     "chevron-down": <path d="m6 9 6 6 6-6" />,
@@ -94,5 +97,28 @@ export const ICON_PATHS: Record<IconName, ReactNode> = {
     ),
     moon: (
         <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
+    ),
+    list: (
+        <>
+            <path d="M3 6h.01" />
+            <path d="M3 12h.01" />
+            <path d="M3 18h.01" />
+            <path d="M8 6h13" />
+            <path d="M8 12h13" />
+            <path d="M8 18h13" />
+        </>
+    ),
+    image: (
+        <>
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+        </>
+    ),
+    video: (
+        <>
+            <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
+            <rect x="2" y="6" width="14" height="12" rx="2" />
+        </>
     ),
 };

@@ -97,7 +97,6 @@
     "PostsFeed": {
         "title": "Посты",
         "description": "Статьи о React, Next.js, TypeScript, архитектуре UI и современной фронтенд разработке.",
-        "viewMode": "Вид",
         "viewModeAria": "Выбрать вид отображения постов",
         "empty": "По этому запросу посты не найдены.",
         "modes": {
