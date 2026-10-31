@@ -7,7 +7,6 @@
     --light-gradient: linear-gradient(to bottom, rgb(255 253 200 / 40%) 0%, transparent 100%);
     --eye-white: #f5f5f5;
     --pupil-color: #111;
-    --lid-color: #282a36;
     --smoke-color: #fff;
     --mug-color: #fdfdfd;
     --mug-accent: #323330;
@@ -195,20 +194,12 @@
         border-radius: 50%;
     }
 
-    &__eye-widget svg {
-        clip-path: ellipse(45% 28% at 50% 50%);
-    }
-
     &__eye-ball {
         fill: var(--eye-white);
     }
 
     &__pupil {
         fill: var(--pupil-color);
-    }
-
-    &__lid {
-        fill: var(--lid-color);
     }
 
     &__stand-neck {

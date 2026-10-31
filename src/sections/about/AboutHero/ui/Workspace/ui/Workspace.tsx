@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FC } from "react";
+import { useId, useRef, useState, type FC } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import Prism from "prismjs";
@@ -37,6 +37,7 @@ const SOURCE_CODE = [
 const FULL_SOURCE_CODE = SOURCE_CODE.join("\n");
 
 export const Workspace: FC = () => {
+    const eyeClipId = useId();
     const [lightOn, setLightOn] = useState(false);
 
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -94,9 +95,9 @@ export const Workspace: FC = () => {
 
             gsap.fromTo(
                 lidRef.current,
-                { height: 0 },
+                { attr: { y: 0, height: 100 } },
                 {
-                    height: 110,
+                    attr: { y: 100, height: 0 },
                     duration: 0.3,
                     ease: "power2.inOut",
                     yoyo: true,
@@ -115,9 +116,9 @@ export const Workspace: FC = () => {
             const blinkCycle = () => {
                 blinkTweenRef.current = gsap.fromTo(
                     lidRef.current,
-                    { height: 0 },
+                    { attr: { y: 0, height: 100 } },
                     {
-                        height: 110,
+                        attr: { y: 100, height: 0 },
                         duration: 0.8,
                         ease: "power2.inOut",
                         yoyo: true,
@@ -206,31 +207,29 @@ export const Workspace: FC = () => {
 
                         <div className={styles["workspace__eye-widget"]}>
                             <svg viewBox="0 0 100 100">
-                                <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="45"
-                                    className={styles["workspace__eye-ball"]}
-                                />
+                                <defs>
+                                    <clipPath id={eyeClipId}>
+                                        <rect ref={lidRef} x={-5} y={0} width={110} height={100} />
+                                    </clipPath>
+                                </defs>
 
-                                <g ref={pupilRef}>
+                                <g clipPath={`url(#${eyeClipId})`}>
                                     <circle
                                         cx="50"
                                         cy="50"
-                                        r="22"
-                                        className={styles["workspace__pupil"]}
+                                        r="45"
+                                        className={styles["workspace__eye-ball"]}
                                     />
-                                </g>
 
-                                <rect
-                                    ref={lidRef}
-                                    x={0}
-                                    y={0}
-                                    width={100}
-                                    height={0}
-                                    rx={55}
-                                    className={styles["workspace__lid"]}
-                                />
+                                    <g ref={pupilRef}>
+                                        <circle
+                                            cx="50"
+                                            cy="50"
+                                            r="22"
+                                            className={styles["workspace__pupil"]}
+                                        />
+                                    </g>
+                                </g>
                             </svg>
                         </div>
                     </div>
