@@ -83,7 +83,8 @@
     "PostDetail": {
         "backToPosts": "Ко всем постам",
         "tocTitle": "На этой странице",
-        "playVideo": "Воспроизвести видео"
+        "playVideo": "Воспроизвести видео",
+        "videoDialogTitle": "Видео проекта"
     },
     "NotFound": {
         "heading": "Ошибка 404",

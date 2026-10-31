@@ -9,29 +9,57 @@ import Modal, { useModal } from "@/shared/ui/Modal";
 import styles from "./PostDetail.module.scss";
 
 interface PostDetailMediaProps {
+    postId: string;
+    date: string;
     imageSrc: string;
     imageAlt: string;
     videoUrl: string;
-    date: string;
 }
 
-export const PostDetailMedia = ({ imageSrc, imageAlt, videoUrl, date }: PostDetailMediaProps) => {
-    const { open, openModal, closeModal } = useModal();
-    const t = useTranslations("PostDetail");
+const ProjectVideo = ({ src }: { src: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const year = date.slice(0, 4) || new Date().getFullYear().toString();
 
     useEffect(() => {
-        if (open || !videoRef.current) return;
+        const video = videoRef.current;
+        if (!video) return;
 
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-    }, [open]);
+        void video.play().catch(() => undefined);
+
+        return () => {
+            video.pause();
+            video.currentTime = 0;
+        };
+    }, [src]);
+
+    return (
+        <video
+            ref={videoRef}
+            className={styles["post-detail__video"]}
+            src={src}
+            tabIndex={0}
+            controls
+            playsInline
+        />
+    );
+};
+
+export const PostDetailMedia = ({
+    postId,
+    date,
+    imageSrc,
+    imageAlt,
+    videoUrl,
+}: PostDetailMediaProps) => {
+    const { open, openModal, closeModal } = useModal();
+    const t = useTranslations("PostDetail");
+    const year = date.slice(0, 4);
 
     return (
         <div className={styles["post-detail__hero-media-wrapper"]}>
             <div className={styles["post-detail__hero-media-meta"]} aria-hidden="true">
-                <span className={styles["post-detail__hero-media-meta-value"]}>01</span>
+                <span className={styles["post-detail__hero-media-meta-value"]}>
+                    {postId.padStart(2, "0")}
+                </span>
                 <span className={styles["post-detail__hero-media-meta-line"]} />
                 <span className={styles["post-detail__hero-media-meta-label"]}>POST</span>
             </div>
@@ -83,17 +111,11 @@ export const PostDetailMedia = ({ imageSrc, imageAlt, videoUrl, date }: PostDeta
                     <Modal
                         open={open}
                         onClose={closeModal}
+                        ariaLabel={t("videoDialogTitle")}
                         contentClassName={styles["post-detail__video-modal"]}
                     >
                         <div className={styles["post-detail__video-frame"]}>
-                            <video
-                                ref={videoRef}
-                                className={styles["post-detail__video"]}
-                                src={videoUrl}
-                                controls
-                                autoPlay
-                                playsInline
-                            />
+                            {open && <ProjectVideo src={videoUrl} />}
                         </div>
                     </Modal>
                 </>

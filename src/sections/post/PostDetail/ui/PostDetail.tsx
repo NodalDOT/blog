@@ -29,6 +29,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
 
             <header className={styles["post-detail__hero"]}>
                 <PostDetailMedia
+                    postId={post.id}
                     imageSrc={post.image.src}
                     imageAlt={post.image.alt}
                     videoUrl={post.videoUrl}

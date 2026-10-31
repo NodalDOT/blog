@@ -83,7 +83,8 @@
     "PostDetail": {
         "backToPosts": "Back to posts",
         "tocTitle": "On this page",
-        "playVideo": "Play video"
+        "playVideo": "Play video",
+        "videoDialogTitle": "Project video"
     },
     "NotFound": {
         "heading": "Error 404",

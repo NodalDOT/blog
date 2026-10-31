@@ -48,7 +48,7 @@ export interface PostPageProps {
     params: Promise<{ locale: Locale; slug: string }>;
 }
 
-type PostFrontmatter = Omit<Post, "image"> & {
+type PostFrontmatter = Omit<Post, "image" | "id"> & {
     imageSrc: string;
     imageAlt: string;
 };
@@ -81,6 +81,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
     const post: Post = {
         ...frontmatter,
+        id: slug,
         image: {
             src: frontmatter.imageSrc,
             alt: frontmatter.imageAlt,
