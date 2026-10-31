@@ -346,19 +346,34 @@
 
     &__title {
         @include font-size(h1-tight);
+
+        max-width: 30ch;
+        margin-inline: auto;
+
+        line-height: 1.12;
+        text-align: center;
+        text-wrap: balance;
+        overflow-wrap: anywhere;
     }
 
     &__subtitle {
         @include font-size(h3);
 
+        max-width: 60ch;
+        margin-inline: auto;
+
         color: var(--text-2-color);
+        text-align: center;
+        text-wrap: balance;
+        overflow-wrap: anywhere;
     }
 
     &__content-layout {
         position: relative;
 
         display: flex;
-        gap: 2rem;
+        gap: 3.2rem;
+        justify-content: center;
 
         width: 100%;
         min-width: 0;
@@ -367,6 +382,7 @@
         @include tablet {
             flex-direction: column-reverse;
             gap: 2.4rem;
+            align-items: center;
         }
 
         @include mobile {
@@ -377,9 +393,18 @@
 
     &__content {
         display: flex;
+        flex: 1 1 70ch;
         flex-direction: column;
+
         width: 100%;
         min-width: 0;
+        max-width: 70ch;
+
+        overflow-wrap: anywhere;
+
+        @include tablet {
+            flex: none;
+        }
 
         > * {
             min-width: 0;
@@ -481,6 +506,7 @@
             border-radius: 1.6rem;
 
             color: var(--text-contrast-color);
+            overflow-wrap: normal;
             tab-size: 4;
 
             background: var(--background-contrast-color);
@@ -510,6 +536,8 @@
             border-collapse: collapse;
 
             width: 100%;
+
+            overflow-wrap: normal;
 
             background-color: transparent;
         }

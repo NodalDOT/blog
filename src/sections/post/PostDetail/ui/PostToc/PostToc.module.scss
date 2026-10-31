@@ -6,19 +6,30 @@
 
     overflow: auto;
     display: flex;
+    flex: 0 0 24rem;
     flex-direction: column;
     gap: 1.6rem;
     align-self: start;
 
+    width: 24rem;
+    min-width: 0;
     max-height: calc(100dvh - var(--header-height) - 4rem);
-    padding: 0;
+    padding: 0.4rem;
     border: none;
+
+    overflow-wrap: anywhere;
 
     background: none;
 
     @include tablet {
         position: static;
+
         overflow: visible;
+        flex: none;
+        align-self: center;
+
+        width: 100%;
+        max-width: 70ch;
         max-height: none;
     }
 
@@ -59,5 +70,11 @@
 
     &__link:hover {
         color: var(--text-color);
+    }
+
+    &__link:focus-visible {
+        border-radius: 0.2rem;
+        outline: 2px solid var(--text-color);
+        outline-offset: 2px;
     }
 }
