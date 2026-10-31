@@ -1,7 +1,8 @@
 @use "@/shared/styles/utils/index" as *;
 
 .posts-feed {
-    overflow: hidden;
+    overflow: clip;
+    overflow-clip-margin: 8px;
     display: flex;
     flex-direction: column;
     gap: 3.2rem;
@@ -35,21 +36,44 @@
         gap: 1.6rem;
     }
 
-    &__header {
+    &__toolbar {
         display: flex;
-        gap: 3.2rem;
-        align-items: flex-end;
-        justify-content: space-between;
-
-        @include tablet {
-            gap: 1.6rem;
-        }
+        flex-direction: column;
+        gap: 1.6rem;
 
         @include mobile {
-            flex-direction: column;
-            gap: 1.6rem;
-            align-items: stretch;
-            justify-content: flex-start;
+            gap: 1.2rem;
+        }
+    }
+
+    .posts-feed__search {
+        min-width: 0;
+        max-width: none;
+
+        input {
+            @include font-size(control);
+
+            min-height: 4.8rem;
+            padding-block: 1.2rem;
+
+            &::placeholder {
+                font: inherit;
+                color: var(--text-2-color);
+                opacity: 1;
+            }
+        }
+    }
+
+    &__results-bar {
+        display: flex;
+        gap: 1.6rem;
+        align-items: center;
+        justify-content: space-between;
+
+        min-height: 4.8rem;
+
+        @include mobile {
+            gap: 0.8rem;
         }
     }
 
@@ -98,6 +122,19 @@
         @include mobile {
             @include visually-hidden;
         }
+    }
+
+    &__count {
+        @include font-size(control);
+
+        flex-shrink: 0;
+        align-self: center;
+
+        margin: 0;
+
+        font-variant-numeric: tabular-nums;
+        color: var(--text-2-color);
+        white-space: nowrap;
     }
 
     &__grid {

@@ -95,6 +95,7 @@
         "scrollToTop": "Наверх"
     },
     "PostsFeed": {
+        "results": "{count, plural, =0 {Нет постов} one {# пост} few {# поста} many {# постов} other {# поста}}",
         "title": "Посты",
         "description": "Статьи о React, Next.js, TypeScript, архитектуре UI и современной фронтенд разработке.",
         "viewModeAria": "Выбрать вид отображения постов",
@@ -114,7 +115,7 @@
     },
     "Search": {
         "label": "Поиск постов",
-        "placeholder": "Введите что-нибудь..."
+        "placeholder": "Поиск…"
     },
     "Metadata": {
         "title": "NodalDOT блог",

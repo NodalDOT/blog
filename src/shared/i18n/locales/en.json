@@ -95,6 +95,7 @@
         "scrollToTop": "Scroll to top"
     },
     "PostsFeed": {
+        "results": "{count, plural, =0 {No posts} one {# post} other {# posts}}",
         "title": "Posts",
         "description": "Articles about React, Next.js, TypeScript, UI architecture, and modern frontend engineering.",
         "viewModeAria": "Select view mode for posts",
@@ -114,7 +115,7 @@
     },
     "Search": {
         "label": "Search posts",
-        "placeholder": "Type something..."
+        "placeholder": "Search…"
     },
     "Metadata": {
         "title": "NodalDOT blog",
