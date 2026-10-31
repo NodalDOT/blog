@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/shared/ui/Icon";
-import Tags from "@/shared/ui/Tags";
+
 import { assertDefined } from "@/shared/lib/assert";
 import { classNames } from "@/shared/lib/classNames";
 import { debounce } from "@/shared/lib/debounce";
@@ -143,10 +143,6 @@ export const AboutPath: FC = () => {
 
                 <ol className={styles["about-path__list"]}>
                     {itemKeys.map((key, i) => {
-                        const tags = t(`items.${key}.tags`)
-                            .split(",")
-                            .map((s) => s.trim());
-
                         return (
                             <li
                                 key={key}
@@ -167,7 +163,9 @@ export const AboutPath: FC = () => {
                                             {t(`items.${key}.place`)}
                                         </span>
 
-                                        <Tags tags={tags} className={styles["about-path__tags"]} />
+                                        <p className={styles["about-path__description"]}>
+                                            {t(`items.${key}.description`)}
+                                        </p>
                                     </div>
 
                                     <div className={styles["about-path__before"]}>

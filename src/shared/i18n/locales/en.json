@@ -29,19 +29,19 @@
                     "date": "2025 — Present",
                     "title": "Frontend Junior",
                     "place": "NDA Company",
-                    "tags": "1 year of work, React, Next.js, TypeScript, SCSS"
+                    "description": "1 year of work, React, Next.js, TypeScript, SCSS"
                 },
                 "university": {
                     "date": "Current",
                     "title": "University Studies",
                     "place": "LTU, 3rd year",
-                    "tags": "Still studying, combining university and work"
+                    "description": "Still studying, combining university and work"
                 },
                 "self_study": {
                     "date": "2022 — Present",
                     "title": "Self-study",
                     "place": "Frontend Development",
-                    "tags": "4 years already, React, TypeScript, Architecture, Performance"
+                    "description": "4 years already, React, TypeScript, Architecture, Performance"
                 }
             }
         }

@@ -29,19 +29,19 @@
                     "date": "2025 — Наст. время",
                     "title": "Frontend Junior",
                     "place": "Компания под NDA",
-                    "tags": "Работаю уже год, React, Next.js, TypeScript, SCSS"
+                    "description": "Работаю уже год, React, Next.js, TypeScript, SCSS"
                 },
                 "university": {
                     "date": "Сейчас",
                     "title": "Обучение в вузе",
                     "place": "ЛТУ, 3 курс",
-                    "tags": "Продолжаю обучение, совмещаю учебу и работу"
+                    "description": "Продолжаю обучение, совмещаю учебу и работу"
                 },
                 "self_study": {
                     "date": "2022 — Наст. время",
                     "title": "Самостоятельное обучение",
                     "place": "Frontend Development",
-                    "tags": "Уже 4 года, React, TypeScript, Архитектура, Performance"
+                    "description": "Уже 4 года, React, TypeScript, Архитектура, Performance"
                 }
             }
         }
