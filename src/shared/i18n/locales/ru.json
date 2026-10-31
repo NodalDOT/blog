@@ -84,7 +84,8 @@
         "backToPosts": "Ко всем постам",
         "tocTitle": "На этой странице",
         "playVideo": "Воспроизвести видео",
-        "videoDialogTitle": "Видео проекта"
+        "videoDialogTitle": "Видео проекта",
+        "published": "Опубликовано"
     },
     "NotFound": {
         "heading": "Ошибка 404",

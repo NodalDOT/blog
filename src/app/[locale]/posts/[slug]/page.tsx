@@ -152,6 +152,13 @@ export default async function PostPage({ params }: PostPageProps) {
                 content={content}
                 backLabel={t("backToPosts")}
                 tocLabel={t("tocTitle")}
+                publishedLabel={t("published")}
+                publishedDate={new Intl.DateTimeFormat(locale, {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    timeZone: "UTC",
+                }).format(new Date(post.date))}
                 toc={toc}
             />
         </>

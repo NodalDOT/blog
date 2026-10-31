@@ -286,6 +286,35 @@
         }
     }
 
+    &__hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.2rem 2.4rem;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__published {
+        @include font-size(control);
+
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.8rem;
+        align-items: baseline;
+
+        min-width: 0;
+        margin: 0;
+
+        font-variant-numeric: tabular-nums;
+        color: var(--text-2-color);
+        overflow-wrap: anywhere;
+
+        time {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+    }
+
     &__back-link {
         @include default-tr;
 

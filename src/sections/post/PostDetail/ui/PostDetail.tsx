@@ -13,6 +13,8 @@ interface PostDetailProps {
     content: React.ReactElement;
     backLabel: string;
     tocLabel: string;
+    publishedLabel: string;
+    publishedDate: string;
     toc?: TocItem[];
 }
 
@@ -21,6 +23,8 @@ export const PostDetail: React.FC<PostDetailProps> = ({
     content,
     backLabel,
     tocLabel,
+    publishedLabel,
+    publishedDate,
     toc = [],
 }) => {
     return (
@@ -30,14 +34,21 @@ export const PostDetail: React.FC<PostDetailProps> = ({
             <header className={styles["post-detail__hero"]}>
                 <PostDetailMedia
                     postId={post.id}
+                    date={post.date}
                     imageSrc={post.image.src}
                     imageAlt={post.image.alt}
                     videoUrl={post.videoUrl}
-                    date={post.date}
                 />
 
                 <div className={styles["post-detail__hero-content"]}>
-                    <PostBackLink label={backLabel} />
+                    <div className={styles["post-detail__hero-meta"]}>
+                        <PostBackLink label={backLabel} />
+
+                        <p className={styles["post-detail__published"]}>
+                            <span>{publishedLabel}</span>
+                            <time dateTime={post.date}>{publishedDate}</time>
+                        </p>
+                    </div>
 
                     <h1 className={styles["post-detail__title"]}>{post.title}</h1>
 
