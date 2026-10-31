@@ -41,6 +41,7 @@
         justify-content: flex-start;
 
         width: 100%;
+        min-width: 0;
         height: auto;
 
         @include tablet {

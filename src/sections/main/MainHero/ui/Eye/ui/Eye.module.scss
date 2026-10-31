@@ -7,6 +7,7 @@
     align-items: center;
     justify-content: center;
 
+    max-width: 100%;
     border-radius: 1.2rem;
 
     background-color: var(--background-contrast-color);
@@ -20,6 +21,8 @@
         justify-content: center;
 
         @include box(30rem);
+
+        max-width: 100%;
 
         @include tablet {
             @include box(25rem);
@@ -154,19 +157,27 @@
 
     &__block--top-left,
     &__block--bottom-left {
-        left: -11rem;
+        left: max(-11rem, -5vw);
+
+        @media (1024px <= width < 1280px) {
+            left: max(-4rem, -5vw);
+        }
 
         @include tablet {
-            left: -10rem;
+            left: max(-10rem, -5vw);
         }
     }
 
     &__block--top-right,
     &__block--bottom-right {
-        right: -11rem;
+        right: max(-11rem, -5vw);
+
+        @media (1024px <= width < 1280px) {
+            right: max(-4rem, -5vw);
+        }
 
         @include tablet {
-            right: -10rem;
+            right: max(-10rem, -5vw);
         }
     }
 

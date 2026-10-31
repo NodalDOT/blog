@@ -53,10 +53,20 @@ $fonts: (
         lh: 1.6,
         weight: 600,
     ),
+    control: (
+        size: 1.6rem,
+        lh: 1.5,
+        weight: 400,
+    ),
     control-medium: (
-        size: 16px,
+        size: 1.6rem,
         lh: 1.5,
         weight: 500,
+    ),
+    caption: (
+        size: 1.4rem,
+        lh: 1.5,
+        weight: 400,
     ),
     body-code: (
         size: 1.7rem,
@@ -256,16 +266,4 @@ $fonts-mobile: (
 
 @mixin root-fonts() {
     font-size: 62.5%;
-
-    @media (width <= 767px) {
-        font-size: calc(10px + 13 * (100vw - 375px) / 447);
-    }
-
-    @media (width >= 768px) and (width <= 1023px) {
-        font-size: calc(10px + 4 * (100vw - 768px) / 255);
-    }
-
-    @media (width >= 1024px) and (width <= 1360px) {
-        font-size: calc(8px + 2 * (100vw - 1024px) / 336);
-    }
 }

@@ -33,7 +33,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: clamp(32rem, 90vw, 144rem);
+    max-width: min(90vw, 144rem);
     margin-inline: auto;
 }
 
