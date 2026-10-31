@@ -11,6 +11,10 @@
         color: var(--text-color);
         text-transform: uppercase;
         opacity: 0.8;
+
+        &--hidden {
+            @include visually-hidden;
+        }
     }
 
     &__field {
