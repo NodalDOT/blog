@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, type FC } from "react";
+import React, { useEffect, useId, type FC } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.scss";
 import { classNames } from "@/shared/lib/classNames";
@@ -12,93 +12,106 @@ interface ModalProps {
     children: React.ReactNode;
     title?: string | undefined;
     description?: string | undefined;
+    ariaLabel?: string | undefined;
     contentClassName?: string | undefined;
 }
 
 const FOCUSABLE_SELECTOR =
-    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    'a[href], button, textarea, input:not([type="hidden"]), select, video[controls], audio[controls], [tabindex]';
+
+const getFocusableElements = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (element) =>
+            element.tabIndex >= 0 &&
+            !element.hasAttribute("data-modal-focus-guard") &&
+            !element.matches(":disabled") &&
+            !element.closest('[inert], [aria-hidden="true"]') &&
+            element.getClientRects().length > 0 &&
+            getComputedStyle(element).visibility === "visible"
+    );
 
 const Modal: FC<ModalProps> = (props) => {
-    const { open, onClose, children, title, description, contentClassName } = props;
+    const { open, onClose, children, title, description, ariaLabel, contentClassName } = props;
     const t = useTranslations("Modal");
     const [mounted, setMounted] = React.useState(false);
     const modalRef = React.useRef<HTMLDivElement>(null);
-    const previouslyFocusedRef = React.useRef<HTMLElement | null>(null);
+    const id = useId();
+    const titleId = title ? `${id}-title` : undefined;
+    const descId = description ? `${id}-description` : undefined;
+    const focusBoundary = (last: boolean) => {
+        const modal = modalRef.current;
+        if (!modal) return;
+
+        const focusable = getFocusableElements(modal);
+        const target = last ? focusable[focusable.length - 1] : focusable[0];
+        (target ?? modal).focus({ preventScroll: true });
+    };
 
     useEffect(() => {
-        const id = requestAnimationFrame(() => {
+        const frame = requestAnimationFrame(() => {
             setMounted(true);
         });
-        return () => cancelAnimationFrame(id);
+        return () => cancelAnimationFrame(frame);
     }, []);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open || !mounted) return;
 
-        previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+        const modal = modalRef.current;
+        if (!modal) return;
 
-        const id = requestAnimationFrame(() => {
-            const focusable = modalRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-            (focusable?.[0] ?? modalRef.current)?.focus();
-        });
+        const previouslyFocused =
+            document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const focusFirst = () => {
+            (getFocusableElements(modal)[0] ?? modal).focus({ preventScroll: true });
+        };
+        const frame = requestAnimationFrame(focusFirst);
+        const containFocus = (event: FocusEvent) => {
+            if (event.target instanceof Node && !modal.contains(event.target)) {
+                focusFirst();
+            }
+        };
+        document.addEventListener("focusin", containFocus);
 
         return () => {
-            cancelAnimationFrame(id);
-            previouslyFocusedRef.current?.focus();
+            cancelAnimationFrame(frame);
+            document.removeEventListener("focusin", containFocus);
+            if (previouslyFocused?.isConnected) {
+                previouslyFocused.focus({ preventScroll: true });
+            }
         };
-    }, [open]);
+    }, [open, mounted]);
 
     useEffect(() => {
-        if (open) {
-            const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (!open || !mounted) return;
 
-            document.body.style.overflow = "hidden";
-            document.body.style.paddingRight = `${scrollBarWidth}px`;
-        } else {
-            document.body.style.overflow = "";
-            document.body.style.paddingRight = "";
-        }
+        const { overflow, paddingRight } = document.body.style;
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        const currentPadding = Number.parseFloat(getComputedStyle(document.body).paddingRight) || 0;
+
+        document.body.style.overflow = "hidden";
+        document.body.style.paddingRight = `${currentPadding + scrollBarWidth}px`;
 
         return () => {
-            document.body.style.overflow = "";
-            document.body.style.paddingRight = "";
+            document.body.style.overflow = overflow;
+            document.body.style.paddingRight = paddingRight;
         };
-    }, [open]);
+    }, [open, mounted]);
 
     useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
+        if (!open || !mounted) return;
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                event.preventDefault();
                 onClose();
-                return;
-            }
-
-            if (e.key !== "Tab" || !modalRef.current) return;
-
-            const focusable = Array.from(
-                modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-            );
-            if (focusable.length === 0) return;
-
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            if (!first || !last) return;
-
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
             }
         };
-        if (open) document.addEventListener("keydown", onKeyDown);
+        document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
-    }, [open, onClose]);
+    }, [open, mounted, onClose]);
 
     if (!mounted) return null;
-
-    const titleId = title ? "modal-title" : undefined;
-    const descId = description ? "modal-description" : undefined;
 
     return createPortal(
         <div
@@ -108,6 +121,7 @@ const Modal: FC<ModalProps> = (props) => {
             )}
             onClick={onClose}
             aria-hidden={!open}
+            inert={!open}
         >
             <div
                 ref={modalRef}
@@ -119,10 +133,17 @@ const Modal: FC<ModalProps> = (props) => {
                 )}
                 role="dialog"
                 aria-modal="true"
+                aria-label={title ? undefined : ariaLabel}
                 aria-labelledby={titleId}
                 aria-describedby={descId}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
+                <span
+                    className={styles["modal__focus-guard"]}
+                    data-modal-focus-guard
+                    tabIndex={open ? 0 : -1}
+                    onFocus={() => focusBoundary(true)}
+                />
                 {title && <h2 id={titleId}>{title}</h2>}
                 {description && <p id={descId}>{description}</p>}
 
@@ -135,6 +156,12 @@ const Modal: FC<ModalProps> = (props) => {
                     <Icon name="x" />
                 </button>
                 {children}
+                <span
+                    className={styles["modal__focus-guard"]}
+                    data-modal-focus-guard
+                    tabIndex={open ? 0 : -1}
+                    onFocus={() => focusBoundary(false)}
+                />
             </div>
         </div>,
         document.body

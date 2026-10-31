@@ -49,6 +49,19 @@
         }
     }
 
+    &__focus-guard {
+        position: absolute;
+
+        overflow: hidden;
+
+        width: 1px;
+        height: 1px;
+
+        white-space: nowrap;
+
+        clip-path: inset(50%);
+    }
+
     &__close {
         @include default-tr;
 
