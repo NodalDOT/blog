@@ -1,6 +1,6 @@
 ---
 title: "Nodal-dot Blog - My First Public Project"
-subtitle: "A modern Next.js 15 blog with FSD architecture, a Three.js skills globe and GSAP animations"
+subtitle: "How the Next.js blog started: FSD architecture, GSAP animations and an earlier Three.js skills globe"
 date: "2026-05-25"
 imageSrc: "/posts/images/1.jpg"
 imageAlt: "Nodal-dot blog preview"
@@ -12,6 +12,8 @@ videoUrl: "/posts/videos/1.mp4"
 I decided to build this project with one rule: no ready-made UI kits, no templates - everything from scratch.
 
 ## Stack
+
+This article describes the project's early version. The stack below reflects that version, not the site's current dependency versions. The About page now has an eye illustration and a grid of technology links in place of the Three.js globe.
 
 The choice of technologies was simple - lately I've been getting into the Next.js documentation, which is what pushed me to build my own site on it.
 
@@ -47,15 +49,17 @@ shared/    → UI kit, utilities, i18n config
 
 ### 3D Skills Globe (Three.js)
 
-The skills section on the About page is a fully custom Three.js scene: a sphere of technology icons built from SVG textures mapped onto sprites.
+In the earlier version, the skills section on the About page used a custom Three.js scene: a sphere of technology icons built from SVG textures mapped onto sprites. That globe is no longer the current skills interface.
 
-Interaction: hovering a node highlights its connections to the nearest neighbors via arc geometry. A click smoothly rotates the globe toward the target node with an animation.
+The interaction described here belongs to that earlier implementation: hovering a node highlighted its connections to the nearest neighbors via arc geometry, and clicking smoothly rotated the globe toward the target node.
 
-Performance is managed explicitly:
+The original implementation also described these performance controls:
 
-- `prefers-reduced-motion` disables animation on accessibility request
-- Battery API pauses animation when charge drops below 20%
-- Low `hardwareConcurrency` or `deviceMemory` also reduces load
+- `prefers-reduced-motion` disabled animation on accessibility request
+- Battery API paused animation when charge dropped below 20%
+- Low `hardwareConcurrency` or `deviceMemory` also reduced load
+
+These controls refer to the historical globe, not the current eye and technology-link grid. In the current section, the eye responds to pointer movement and to hovering or focusing technology links.
 
 ### Animated Career Timeline
 
