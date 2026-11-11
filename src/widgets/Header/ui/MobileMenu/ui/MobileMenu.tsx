@@ -24,6 +24,8 @@ export const MobileMenu: FC<MobileMenuProps> = (props) => {
     return (
         <div className={styles["mobile-menu"]}>
             <button
+                type="button"
+                aria-haspopup="dialog"
                 onClick={toggleModal}
                 aria-expanded={open}
                 aria-label={open ? t("closeMenu") : t("openMenu")}
@@ -37,7 +39,7 @@ export const MobileMenu: FC<MobileMenuProps> = (props) => {
                 <span className={styles["mobile-menu__line"]} />
             </button>
 
-            <Modal open={open} onClose={closeModal}>
+            <Modal open={open} onClose={closeModal} ariaLabel={t("dialogTitle")}>
                 <nav className={styles["mobile-menu__nav"]} aria-label={ariaLabel}>
                     {links.map(({ href, label }) => (
                         <Link

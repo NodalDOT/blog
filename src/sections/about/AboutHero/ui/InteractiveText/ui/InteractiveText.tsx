@@ -40,7 +40,6 @@ export const InteractiveText: FC = () => {
                         e.preventDefault();
                         startTransition("/posts");
                     }}
-                    ariaLabel={t("buttonAria")}
                 >
                     {t("button")}
                 </Button>

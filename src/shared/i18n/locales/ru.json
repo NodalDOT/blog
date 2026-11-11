@@ -7,16 +7,22 @@
             "button": "Посмотреть мои работы"
         },
         "MainPosts": {
-            "title": "Посты"
+            "title": "Посты",
+            "carouselLabel": "Последние посты",
+            "slideLabel": "Пост {index} из {slidesLength}",
+            "paginationLabel": "Показать слайд {index}"
         }
     },
     "AboutPage": {
+        "Workspace": {
+            "toggleLight": "Переключить освещение рабочего места",
+            "replayCode": "Повторить анимацию кода"
+        },
         "interactiveText": {
             "title": "Обо мне",
             "paragraph1": "Я <dev>фронтенд-разработчик</dev>, специализирующийся на создании <perf>производительных</perf> и <access>доступных</access> интерфейсов.",
             "paragraph2": "В коде ценю <types>строгую типизацию</types>, чистую <architecture>архитектуру</architecture> и <pixel>Pixel Perfect</pixel> верстку. Верю, что детали имеют значение.",
-            "button": "Посмотреть посты",
-            "buttonAria": "Перейти в посты"
+            "button": "Посмотреть посты"
         },
         "AboutSkill": {
             "title": "Мои навыки",
@@ -109,6 +115,7 @@
         }
     },
     "MobileMenu": {
+        "dialogTitle": "Навигация",
         "openMenu": "Открыть меню",
         "closeMenu": "Закрыть меню"
     },

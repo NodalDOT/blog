@@ -2,7 +2,8 @@
 
 import type { FC } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
+import { A11y, Pagination } from "swiper/modules";
+import { useTranslations } from "next-intl";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -18,6 +19,7 @@ interface PostsSwiperProps {
 }
 const PostsSwiper: FC<PostsSwiperProps> = (props) => {
     const { posts, onReady, paginationClassName } = props;
+    const t = useTranslations("HomePage.MainPosts");
     return (
         <Swiper
             onInit={(swiper) => {
@@ -29,10 +31,19 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
             initialSlide={0}
             slidesPerView={3}
             spaceBetween={24}
-            modules={[Pagination]}
+            modules={[Pagination, A11y]}
+            a11y={{
+                containerMessage: t("carouselLabel"),
+                slideLabelMessage: t("slideLabel", {
+                    index: "{{index}}",
+                    slidesLength: "{{slidesLength}}",
+                }),
+                paginationBulletMessage: t("paginationLabel", { index: "{{index}}" }),
+            }}
             className={styles["main-posts__slider"]}
             pagination={{
                 clickable: true,
+                bulletElement: "button",
                 el: `.${paginationClassName}`,
             }}
             breakpoints={{
@@ -50,9 +61,9 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
                 },
             }}
         >
-            {posts.map((post, index) => {
+            {posts.map((post) => {
                 return (
-                    <SwiperSlide key={index} className={styles["swiper-slide"]}>
+                    <SwiperSlide key={post.id} className={styles["swiper-slide"]}>
                         <PostCard
                             id={post.id}
                             title={post.title}

@@ -11,9 +11,14 @@
     &__line {
         @include default-tr;
 
+        flex-shrink: 0;
+
+        width: 2.4rem;
         height: 0.3rem;
         border-radius: 0.2rem;
+
         background: var(--text-color);
+
         transition-property: transform, opacity;
     }
 
@@ -22,16 +27,23 @@
 
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        gap: 0.55rem;
+        align-items: center;
+        justify-content: center;
 
-        width: 2.4rem;
-        height: 2rem;
+        width: 44px;
+        height: 44px;
         padding: 0;
         border: none;
 
         background: transparent;
 
         transition-property: transform;
+
+        &:focus-visible {
+            outline: 2px solid var(--text-color);
+            outline-offset: 2px;
+        }
 
         &--active {
             .mobile-menu__line:nth-child(1) {

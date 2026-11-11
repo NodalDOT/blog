@@ -59,7 +59,30 @@
         margin: 0 auto;
 
         :global(.swiper-pagination-bullet) {
-            background-color: var(--background-contrast-color);
+            position: relative;
+
+            width: 2.4rem;
+            height: 2.4rem;
+            padding: 0;
+            border: 0;
+
+            background: transparent;
+
+            &::before {
+                content: "";
+
+                position: absolute;
+                inset: 0.8rem;
+
+                border-radius: 50%;
+
+                background-color: var(--background-contrast-color);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--text-color);
+                outline-offset: 2px;
+            }
         }
 
         :global(.swiper-pagination-bullet-active) {

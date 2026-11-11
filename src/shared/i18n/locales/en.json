@@ -7,16 +7,22 @@
             "button": "See my work"
         },
         "MainPosts": {
-            "title": "Posts"
+            "title": "Posts",
+            "carouselLabel": "Recent posts",
+            "slideLabel": "Post {index} of {slidesLength}",
+            "paginationLabel": "Show slide {index}"
         }
     },
     "AboutPage": {
+        "Workspace": {
+            "toggleLight": "Toggle workspace light",
+            "replayCode": "Replay code animation"
+        },
         "interactiveText": {
             "title": "About me",
             "paragraph1": "I am a <dev>frontend developer</dev> specializing in building <perf>high-performance</perf> and <access>accessible</access> interfaces.",
             "paragraph2": "In code, I value <types>strict typing</types>, clean <architecture>architecture</architecture>, and <pixel>pixel-perfect</pixel> layout. I believe details matter.",
-            "button": "View posts",
-            "buttonAria": "Go to posts"
+            "button": "View posts"
         },
         "AboutSkill": {
             "title": "My skills",
@@ -109,6 +115,7 @@
         }
     },
     "MobileMenu": {
+        "dialogTitle": "Navigation",
         "openMenu": "Open menu",
         "closeMenu": "Close menu"
     },

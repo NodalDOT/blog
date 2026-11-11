@@ -4,6 +4,7 @@ import { useId, useRef, useState, type FC } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import Prism from "prismjs";
+import { useTranslations } from "next-intl";
 
 import { assertDefined } from "@/shared/lib/assert";
 import { classNames } from "@/shared/lib/classNames";
@@ -11,13 +12,6 @@ import { initGsap } from "@/shared/lib/gsap/init";
 import styles from "./Workspace.module.scss";
 
 initGsap();
-
-const handleActionKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, action: () => void) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-
-    event.preventDefault();
-    action();
-};
 
 const SOURCE_CODE = [
     "const developer = {",
@@ -37,6 +31,7 @@ const SOURCE_CODE = [
 const FULL_SOURCE_CODE = SOURCE_CODE.join("\n");
 
 export const Workspace: FC = () => {
+    const t = useTranslations("AboutPage.Workspace");
     const eyeClipId = useId();
     const [lightOn, setLightOn] = useState(false);
 
@@ -193,7 +188,6 @@ export const Workspace: FC = () => {
         <div
             ref={wrapperRef}
             className={classNames(styles["workspace"], lightOn && styles["workspace--light-on"])}
-            aria-hidden
         >
             <div className={styles["workspace__monitor-group"]}>
                 <div
@@ -201,28 +195,23 @@ export const Workspace: FC = () => {
                     style={{ opacity: lightOn ? 1 : 0 }}
                 />
 
-                <div
+                <button
+                    type="button"
                     className={styles["workspace__screen-bar"]}
-                    role="button"
-                    tabIndex={0}
+                    aria-label={t("toggleLight")}
+                    aria-pressed={lightOn}
                     onClick={() => setLightOn((v) => !v)}
-                    onKeyDown={(event) =>
-                        handleActionKeyDown(event, () => setLightOn((value) => !value))
-                    }
                 />
 
                 <div className={styles["workspace__monitor-frame"]}>
-                    <div
-                        className={styles["workspace__screen"]}
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleScreenClick}
-                        onKeyDown={(event) => handleActionKeyDown(event, handleScreenClick)}
-                    >
-                        <div className={styles["workspace__code-container"]}>
-                            {/* Invisible copy of the full snippet. It reserves exactly the
-                                height the typed text will need at any width, so the layout
-                                never depends on a JS measurement. */}
+                    <div className={styles["workspace__screen"]}>
+                        <button
+                            type="button"
+                            className={styles["workspace__screen-action"]}
+                            aria-label={t("replayCode")}
+                            onClick={handleScreenClick}
+                        />
+                        <div className={styles["workspace__code-container"]} aria-hidden="true">
                             <pre className={styles["workspace__code-sizer"]} aria-hidden="true">
                                 {FULL_SOURCE_CODE}
                             </pre>
@@ -232,7 +221,7 @@ export const Workspace: FC = () => {
                             </pre>
                         </div>
 
-                        <div className={styles["workspace__eye-widget"]}>
+                        <div className={styles["workspace__eye-widget"]} aria-hidden="true">
                             <svg viewBox="0 0 100 100">
                                 <defs>
                                     <clipPath id={eyeClipId}>
