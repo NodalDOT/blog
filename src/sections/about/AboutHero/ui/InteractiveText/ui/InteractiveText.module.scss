@@ -6,6 +6,16 @@
     gap: 2rem;
     justify-content: center;
 
+    min-width: 0;
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
     @include tablet {
         align-items: center;
     }
@@ -18,12 +28,15 @@
         @include default-tr;
 
         cursor: pointer;
+
         color: var(--text-contrast-color);
         text-shadow:
             1px 1px 0 var(--text-color),
             -1px 1px 0 var(--text-color),
             1px -1px 0 var(--text-color),
             -1px -1px 0 var(--text-color);
+        white-space: normal;
+
         transition-property: color, text-shadow;
 
         &:hover {
@@ -36,6 +49,15 @@
             gap: 1rem;
             align-items: center;
             margin-top: 1rem;
+        }
+    }
+
+    &__actions {
+        > a {
+            min-width: 0;
+            max-width: 100%;
+            text-align: center;
+            white-space: normal;
         }
     }
 }

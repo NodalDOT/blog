@@ -4,7 +4,7 @@
     position: relative;
 
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
 
     padding: 2.4rem 4rem;
@@ -78,7 +78,9 @@
 
     &__meta {
         justify-self: center;
-        white-space: nowrap;
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
 
         &:nth-of-type(1) {
             justify-self: start;
@@ -99,5 +101,10 @@
         gap: 0.4rem 0.8rem;
         align-items: baseline;
         justify-content: center;
+
+        > a {
+            min-width: 0;
+            max-width: 100%;
+        }
     }
 }

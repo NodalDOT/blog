@@ -12,6 +12,11 @@
         flex-direction: column;
         gap: 2rem;
 
+        min-width: 0;
+        max-width: 100%;
+
+        overflow-wrap: anywhere;
+
         p {
             opacity: 0.9;
         }
@@ -53,7 +58,9 @@
 
     &__button {
         width: fit-content;
+        max-width: 100%;
         margin: 2.4rem auto 0;
+        white-space: normal;
     }
 
     @include tablet {
