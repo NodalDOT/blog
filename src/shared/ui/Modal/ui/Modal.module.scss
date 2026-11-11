@@ -32,7 +32,10 @@
         position: relative;
         transform: scale(0.95);
 
-        max-width: 90rem;
+        overflow: auto;
+
+        max-width: min(90rem, calc(100vw - 3.2rem));
+        max-height: calc(100dvh - 3.2rem);
         padding: 4.8rem;
         border-radius: 2.4rem;
 
@@ -62,33 +65,70 @@
         clip-path: inset(50%);
     }
 
+    &__header {
+        display: flex;
+        gap: 1.6rem;
+        align-items: center;
+        justify-content: flex-end;
+
+        margin-bottom: 1.6rem;
+    }
+
+    &__title {
+        min-width: 0;
+        margin: 0 auto 0 0;
+
+        font-size: 1.8rem;
+        font-weight: 600;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
     &__close {
         @include default-tr;
 
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
+        cursor: pointer;
 
-        display: flex;
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
 
+        width: max(44px, 4.4rem);
+        height: max(44px, 4.4rem);
         padding: 0.8rem;
-        border-radius: 50%;
+        border: 1px solid currentcolor;
+        border-radius: 0.8rem;
 
-        color: var(--background-color);
+        color: var(--text-color);
 
-        background-color: var(--text-color);
+        background: var(--background-color);
 
         transition-property: background-color, color;
 
         > svg {
-            @include box(2.4rem);
+            @include box(2rem);
         }
 
-        &:hover,
-        &:focus {
-            color: var(--text-color);
-            background-color: var(--background-color);
-            outline: none;
+        &:hover {
+            color: var(--background-color);
+            background: var(--text-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--text-color);
+            outline-offset: 3px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__backdrop,
+        &__content,
+        &__close {
+            transition: none;
+        }
+
+        &__content {
+            transform: none;
         }
     }
 }

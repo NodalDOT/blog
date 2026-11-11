@@ -111,7 +111,7 @@ export const PostDetailMedia = ({
                     <Modal
                         open={open}
                         onClose={closeModal}
-                        ariaLabel={t("videoDialogTitle")}
+                        title={t("videoDialogTitle")}
                         contentClassName={styles["post-detail__video-modal"]}
                     >
                         <div className={styles["post-detail__video-frame"]}>

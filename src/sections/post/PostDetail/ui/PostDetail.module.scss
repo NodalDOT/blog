@@ -259,7 +259,7 @@
 
     &__video-frame {
         overflow: hidden;
-        border-radius: 1.6rem;
+        border-radius: 0.8rem;
         background: var(--background-contrast-color);
     }
 
@@ -269,7 +269,9 @@
         aspect-ratio: 16 / 9;
         width: 100%;
         height: auto;
+        max-height: calc(100dvh - 14rem);
 
+        object-fit: contain;
         background: var(--background-contrast-color);
     }
 

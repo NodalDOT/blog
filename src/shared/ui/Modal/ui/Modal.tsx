@@ -144,17 +144,22 @@ const Modal: FC<ModalProps> = (props) => {
                     tabIndex={open ? 0 : -1}
                     onFocus={() => focusBoundary(true)}
                 />
-                {title && <h2 id={titleId}>{title}</h2>}
+                <div className={styles["modal__header"]}>
+                    {title && (
+                        <h2 className={styles["modal__title"]} id={titleId}>
+                            {title}
+                        </h2>
+                    )}
+                    <button
+                        type="button"
+                        className={styles["modal__close"]}
+                        onClick={onClose}
+                        aria-label={t("close")}
+                    >
+                        <Icon name="x" aria-hidden="true" />
+                    </button>
+                </div>
                 {description && <p id={descId}>{description}</p>}
-
-                <button
-                    type="button"
-                    className={styles["modal__close"]}
-                    onClick={onClose}
-                    aria-label={t("close")}
-                >
-                    <Icon name="x" />
-                </button>
                 {children}
                 <span
                     className={styles["modal__focus-guard"]}
