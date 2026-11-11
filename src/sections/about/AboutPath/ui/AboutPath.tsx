@@ -35,99 +35,111 @@ export const AboutPath: FC = () => {
 
     useGSAP(
         () => {
-            const items = itemsRef.current;
-            const ball = ballRef.current;
-            const progress = progressRef.current;
+            const media = gsap.matchMedia();
 
-            if (!items.length || !ball || !progress) return;
+            media.add("(prefers-reduced-motion: no-preference)", () => {
+                const items = itemsRef.current;
+                const ball = ballRef.current;
+                const progress = progressRef.current;
 
-            const ballOffset = ball.offsetHeight / 2;
+                if (!items.length || !ball || !progress) return;
 
-            gsap.set(ball, { force3D: true });
-            gsap.set(progress, { force3D: true });
+                const ballOffset = ball.offsetHeight / 2;
 
-            const ballSetY = gsap.quickSetter(ball, "y", "px");
-            const progressSetY = gsap.quickSetter(progress, "y", "px");
-            const progressSetScaleY = gsap.quickSetter(progress, "scaleY");
+                gsap.set(ball, { force3D: true });
+                gsap.set(progress, { force3D: true });
 
-            let startY = 0;
-            let endY = 0;
-            let distance = 0;
+                const ballSetY = gsap.quickSetter(ball, "y", "px");
+                const progressSetY = gsap.quickSetter(progress, "y", "px");
+                const progressSetScaleY = gsap.quickSetter(progress, "scaleY");
 
-            const getItemCenter = (item: HTMLElement) => item.offsetTop + item.offsetHeight / 2;
+                let startY = 0;
+                let endY = 0;
+                let distance = 0;
 
-            const calculatePositions = () => {
-                startY = getItemCenter(assertDefined(items[0], "First path item is required"));
-                endY = getItemCenter(
-                    assertDefined(items[items.length - 1], "Last path item is required")
-                );
-                distance = endY - startY;
+                const getItemCenter = (item: HTMLElement) => item.offsetTop + item.offsetHeight / 2;
 
-                gsap.set(progress, { y: startY, height: distance, scaleY: 0 });
-            };
+                const calculatePositions = () => {
+                    startY = getItemCenter(assertDefined(items[0], "First path item is required"));
+                    endY = getItemCenter(
+                        assertDefined(items[items.length - 1], "Last path item is required")
+                    );
+                    distance = endY - startY;
 
-            calculatePositions();
+                    gsap.set(progress, { y: startY, height: distance, scaleY: 0 });
+                };
 
-            const debouncedResizeHandler = debounce(() => {
                 calculatePositions();
-                ScrollTrigger.refresh();
-            }, 300);
-            window.addEventListener("resize", debouncedResizeHandler);
 
-            let lastVisible: boolean | null = null;
-            let lastActiveIndex = -1;
+                const debouncedResizeHandler = debounce(() => {
+                    calculatePositions();
+                    ScrollTrigger.refresh();
+                }, 300);
+                window.addEventListener("resize", debouncedResizeHandler);
 
-            const trigger = ScrollTrigger.create({
-                trigger: assertDefined(items[0], "First path item is required"),
-                start: "top center",
-                endTrigger: assertDefined(items[items.length - 1], "Last path item is required"),
-                end: "center center",
-                scrub: 0.5,
+                let lastVisible: boolean | null = null;
+                let lastActiveIndex = -1;
 
-                onUpdate: (self) => {
-                    const p = self.progress;
+                const trigger = ScrollTrigger.create({
+                    trigger: assertDefined(items[0], "First path item is required"),
+                    start: "top center",
+                    endTrigger: assertDefined(
+                        items[items.length - 1],
+                        "Last path item is required"
+                    ),
+                    end: "center center",
+                    scrub: 0.5,
 
-                    const isVisible = p > 0 && p < 1;
+                    onUpdate: (self) => {
+                        const p = self.progress;
 
-                    if (isVisible !== lastVisible) {
-                        const visibleClass = assertDefined(
-                            styles["is-visible"],
-                            "Visible class is required"
-                        );
-                        ball.classList.toggle(visibleClass, isVisible);
-                        progress.classList.toggle(visibleClass, isVisible);
-                        lastVisible = isVisible;
-                    }
+                        const isVisible = p > 0 && p < 1;
 
-                    ballSetY(startY + distance * p - ballOffset);
-                    progressSetY(startY);
-                    progressSetScaleY(p);
-
-                    const activeIndex = Math.round(p * (items.length - 1));
-
-                    if (activeIndex !== lastActiveIndex) {
-                        const activeClass = assertDefined(
-                            styles["is-active"],
-                            "Active class is required"
-                        );
-                        const previousItem = items[lastActiveIndex];
-                        if (lastActiveIndex >= 0 && previousItem) {
-                            previousItem.classList.remove(activeClass);
+                        if (isVisible !== lastVisible) {
+                            const visibleClass = assertDefined(
+                                styles["is-visible"],
+                                "Visible class is required"
+                            );
+                            ball.classList.toggle(visibleClass, isVisible);
+                            progress.classList.toggle(visibleClass, isVisible);
+                            lastVisible = isVisible;
                         }
-                        const activeItem = items[activeIndex];
-                        if (activeItem) {
-                            activeItem.classList.add(activeClass);
+
+                        ballSetY(startY + distance * p - ballOffset);
+                        progressSetY(startY);
+                        progressSetScaleY(p);
+
+                        const activeIndex = Math.round(p * (items.length - 1));
+
+                        if (activeIndex !== lastActiveIndex) {
+                            const activeClass = assertDefined(
+                                styles["is-active"],
+                                "Active class is required"
+                            );
+                            const previousItem = items[lastActiveIndex];
+                            if (lastActiveIndex >= 0 && previousItem) {
+                                previousItem.classList.remove(activeClass);
+                            }
+                            const activeItem = items[activeIndex];
+                            if (activeItem) {
+                                activeItem.classList.add(activeClass);
+                            }
+                            lastActiveIndex = activeIndex;
                         }
-                        lastActiveIndex = activeIndex;
-                    }
-                },
+                    },
+                });
+
+                return () => {
+                    trigger.kill();
+                    window.removeEventListener("resize", debouncedResizeHandler);
+                    debouncedResizeHandler.cancel();
+                    items.forEach((item) => item.classList.remove(styles["is-active"] ?? ""));
+                    ball.classList.remove(styles["is-visible"] ?? "");
+                    progress.classList.remove(styles["is-visible"] ?? "");
+                };
             });
 
-            return () => {
-                trigger.kill();
-                window.removeEventListener("resize", debouncedResizeHandler);
-                debouncedResizeHandler.cancel();
-            };
+            return () => media.revert();
         },
         { scope: containerRef }
     );

@@ -43,6 +43,8 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
     const [mounted, setMounted] = useState(false);
 
     const savedPathname = useRef(pathname);
+    const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingNavigationRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         const id = requestAnimationFrame(() => setMounted(true));
@@ -69,13 +71,37 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
         isAnimatingRef.current = isAnimating;
     }, [isAnimating]);
 
+    useEffect(() => {
+        const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const handleMotionChange = () => {
+            if (!media.matches) return;
+
+            if (navigationTimeoutRef.current !== null) {
+                clearTimeout(navigationTimeoutRef.current);
+                navigationTimeoutRef.current = null;
+            }
+            const navigate = pendingNavigationRef.current;
+            pendingNavigationRef.current = null;
+            isAnimatingRef.current = false;
+            setIsAnimating(false);
+            navigate?.();
+        };
+
+        media.addEventListener("change", handleMotionChange);
+        return () => {
+            media.removeEventListener("change", handleMotionChange);
+            if (navigationTimeoutRef.current !== null) {
+                clearTimeout(navigationTimeoutRef.current);
+            }
+        };
+    }, []);
+
     const startTransition = useCallback(
         (to: string, locale?: string) => {
             if (isAnimatingRef.current) return;
             if (to === pathname) return;
-            setIsAnimating(true);
 
-            setTimeout(() => {
+            const navigate = () => {
                 startReactTransition(() => {
                     if (locale) {
                         push(to, { locale });
@@ -83,6 +109,20 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
                         push(to);
                     }
                 });
+            };
+
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                navigate();
+                return;
+            }
+
+            isAnimatingRef.current = true;
+            setIsAnimating(true);
+            pendingNavigationRef.current = navigate;
+            navigationTimeoutRef.current = setTimeout(() => {
+                navigationTimeoutRef.current = null;
+                pendingNavigationRef.current = null;
+                navigate();
             }, 400);
         },
         [pathname, push, startReactTransition]

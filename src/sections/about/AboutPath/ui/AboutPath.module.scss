@@ -144,4 +144,23 @@
 
         background: var(--background-contrast-color);
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__ball,
+        &__progress {
+            display: none;
+            transition: none;
+        }
+
+        &__item,
+        &__item.is-active {
+            transform: none;
+            opacity: 1;
+            transition: none;
+        }
+
+        &__card {
+            transition: none;
+        }
+    }
 }

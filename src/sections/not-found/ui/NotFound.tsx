@@ -24,6 +24,7 @@ export const NotFound = () => {
     const [delays, setDelays] = useState<number[]>([]);
 
     useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         if (!buttonRef.current) return;
 
         const rect = buttonRef.current.getBoundingClientRect();
@@ -48,14 +49,30 @@ export const NotFound = () => {
     }, [tiles]);
 
     useEffect(() => {
+        const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const handleMotionChange = () => {
+            if (!media.matches || navigationTimeoutRef.current === null) return;
+
+            clearTimeout(navigationTimeoutRef.current);
+            navigationTimeoutRef.current = null;
+            push("/", { locale });
+        };
+
+        media.addEventListener("change", handleMotionChange);
         return () => {
-            if (navigationTimeoutRef.current) {
+            media.removeEventListener("change", handleMotionChange);
+            if (navigationTimeoutRef.current !== null) {
                 clearTimeout(navigationTimeoutRef.current);
             }
         };
-    }, []);
+    }, [locale, push]);
 
     const startHomeNavigation = () => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            push("/", { locale });
+            return;
+        }
+
         if (animate) return;
 
         setAnimate(true);
@@ -63,6 +80,7 @@ export const NotFound = () => {
 
         navigationTimeoutRef.current = setTimeout(
             () => {
+                navigationTimeoutRef.current = null;
                 push("/", { locale });
             },
             (maxDelay + 0.5) * 1000

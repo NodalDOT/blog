@@ -15,11 +15,15 @@ export const ScrollButton: FC<ScrollButtonProps> = (props) => {
     const { children, target, offset = 0, behavior = "smooth", fallback = "top" } = props;
 
     const scroll = () => {
+        const scrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "instant"
+            : behavior;
+
         if (target) {
             const el = document.querySelector(target);
             if (el) {
                 const y = el.getBoundingClientRect().top + window.scrollY - offset;
-                window.scrollTo({ top: y, behavior });
+                window.scrollTo({ top: y, behavior: scrollBehavior });
                 return;
             }
 
@@ -30,7 +34,7 @@ export const ScrollButton: FC<ScrollButtonProps> = (props) => {
 
         window.scrollTo({
             top: fallback === "bottom" ? document.body.scrollHeight : 0,
-            behavior,
+            behavior: scrollBehavior,
         });
     };
 

@@ -266,8 +266,19 @@
 
         &__pupil,
         &__sclera,
+        &__lashes,
         &__item {
             transition: none;
+        }
+
+        &__eye--focused {
+            .about-skill__sclera {
+                clip-path: ellipse(50% 50% at 50% 50%);
+            }
+
+            .about-skill__lashes {
+                scale: none;
+            }
         }
     }
 }

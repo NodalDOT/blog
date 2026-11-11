@@ -59,6 +59,19 @@ export const Workspace: FC = () => {
             cancelAnimationFrame(rafRef.current);
         }
 
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            rafRef.current = null;
+            codeRef.current.innerHTML = Prism.highlight(
+                FULL_SOURCE_CODE,
+                assertDefined(
+                    Prism.languages["javascript"],
+                    "Prism javascript grammar is required"
+                ),
+                "javascript"
+            );
+            return;
+        }
+
         codeRef.current.innerHTML = "";
 
         const addChar = () => {
@@ -90,6 +103,8 @@ export const Workspace: FC = () => {
     const handleScreenClick = () => {
         typeWriter();
 
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
         if (lidRef.current) {
             gsap.killTweensOf(lidRef.current);
 
@@ -109,55 +124,67 @@ export const Workspace: FC = () => {
 
     useGSAP(
         () => {
-            typeWriter();
+            const media = gsap.matchMedia();
 
-            if (!lidRef.current || !pupilRef.current) return;
+            media.add("(prefers-reduced-motion: reduce)", () => {
+                typeWriter();
+                gsap.set(lidRef.current, { attr: { y: 0, height: 100 } });
+                gsap.set(pupilRef.current, { x: 0, y: 0 });
+            });
 
-            const blinkCycle = () => {
-                blinkTweenRef.current = gsap.fromTo(
-                    lidRef.current,
-                    { attr: { y: 0, height: 100 } },
-                    {
-                        attr: { y: 100, height: 0 },
-                        duration: 0.8,
-                        ease: "power2.inOut",
-                        yoyo: true,
-                        repeat: 1,
-                        onComplete: () => {
-                            blinkDelayRef.current = gsap.delayedCall(
-                                gsap.utils.random(2, 4),
-                                blinkCycle
-                            );
-                        },
+            media.add("(prefers-reduced-motion: no-preference)", () => {
+                typeWriter();
+
+                if (!lidRef.current || !pupilRef.current) return;
+
+                const blinkCycle = () => {
+                    blinkTweenRef.current = gsap.fromTo(
+                        lidRef.current,
+                        { attr: { y: 0, height: 100 } },
+                        {
+                            attr: { y: 100, height: 0 },
+                            duration: 0.8,
+                            ease: "power2.inOut",
+                            yoyo: true,
+                            repeat: 1,
+                            onComplete: () => {
+                                blinkDelayRef.current = gsap.delayedCall(
+                                    gsap.utils.random(2, 4),
+                                    blinkCycle
+                                );
+                            },
+                        }
+                    );
+                };
+
+                blinkCycle();
+
+                const movePupil = () => {
+                    pupilTweenRef.current = gsap.to(pupilRef.current, {
+                        x: gsap.utils.random(-10, 10),
+                        y: gsap.utils.random(-10, 10),
+                        duration: gsap.utils.random(1, 2),
+                        ease: "power1.inOut",
+                        onComplete: movePupil,
+                    });
+                };
+
+                movePupil();
+
+                return () => {
+                    if (rafRef.current) {
+                        cancelAnimationFrame(rafRef.current);
                     }
-                );
-            };
 
-            blinkCycle();
+                    blinkTweenRef.current?.kill();
+                    blinkDelayRef.current?.kill();
+                    pupilTweenRef.current?.kill();
+                    gsap.killTweensOf(lidRef.current);
+                    gsap.killTweensOf(pupilRef.current);
+                };
+            });
 
-            const movePupil = () => {
-                pupilTweenRef.current = gsap.to(pupilRef.current, {
-                    x: gsap.utils.random(-10, 10),
-                    y: gsap.utils.random(-10, 10),
-                    duration: gsap.utils.random(1, 2),
-                    ease: "power1.inOut",
-                    onComplete: movePupil,
-                });
-            };
-
-            movePupil();
-
-            return () => {
-                if (rafRef.current) {
-                    cancelAnimationFrame(rafRef.current);
-                }
-
-                blinkTweenRef.current?.kill();
-                blinkDelayRef.current?.kill();
-                pupilTweenRef.current?.kill();
-                gsap.killTweensOf(lidRef.current);
-                gsap.killTweensOf(pupilRef.current);
-            };
+            return () => media.revert();
         },
         { scope: wrapperRef }
     );

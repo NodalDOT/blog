@@ -104,6 +104,26 @@
         }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        &__glitch,
+        &__glitch span {
+            transform: none;
+            text-shadow: none;
+            animation: none;
+        }
+
+        &__glitch span,
+        &__grid {
+            display: none;
+        }
+
+        &__button,
+        &__button--ghost {
+            opacity: 1;
+            transition: none;
+        }
+    }
+
     @keyframes glitch {
         0%,
         15% {

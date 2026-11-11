@@ -19,6 +19,11 @@
     &--active {
         transform: translateX(0%);
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        display: none;
+        transition: none;
+    }
 }
 
 .content {

@@ -287,4 +287,10 @@
         border: 0.6rem solid var(--mug-color);
         border-radius: 50%;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__light-beam {
+            transition: none;
+        }
+    }
 }

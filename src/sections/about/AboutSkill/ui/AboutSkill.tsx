@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FC } from "react";
 import Image from "next/image";
+import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { classNames } from "@/shared/lib/classNames";
 import { createPupilMotion, type PupilMotion } from "@/shared/lib/pupilMotion";
@@ -21,43 +22,49 @@ export const AboutSkill: FC = () => {
     const [activeSkill, setActiveSkill] = useState<string | null>(null);
 
     useEffect(() => {
-        const section = sectionRef.current;
-        const sclera = scleraRef.current;
-        const pupil = pupilRef.current;
-        if (!section || !sclera || !pupil) return;
+        const media = gsap.matchMedia();
 
-        const motion = createPupilMotion({
-            pupil,
-            sclera,
-            squintRatio: SQUINT_RATIO,
-            isSquinting: () => activeSkillRef.current !== null,
-        });
-        motionRef.current = motion;
-        let frame = 0;
+        media.add("(prefers-reduced-motion: no-preference)", () => {
+            const section = sectionRef.current;
+            const sclera = scleraRef.current;
+            const pupil = pupilRef.current;
+            if (!section || !sclera || !pupil) return;
 
-        const handleMove = (event: PointerEvent) => {
-            if (event.pointerType !== "mouse" || frame) return;
-            frame = requestAnimationFrame(() => {
-                frame = 0;
-                motion.lookAtScreenPoint(event.clientX, event.clientY, FULL_LOOK_DISTANCE);
+            const motion = createPupilMotion({
+                pupil,
+                sclera,
+                squintRatio: SQUINT_RATIO,
+                isSquinting: () => activeSkillRef.current !== null,
             });
-        };
-        const handleLeave = () => {
-            cancelAnimationFrame(frame);
-            frame = 0;
-            motion.lookAt(0, 0, { stiffness: 14 });
-        };
+            motionRef.current = motion;
+            let frame = 0;
 
-        section.addEventListener("pointermove", handleMove, { passive: true });
-        section.addEventListener("pointerleave", handleLeave);
+            const handleMove = (event: PointerEvent) => {
+                if (event.pointerType !== "mouse" || frame) return;
+                frame = requestAnimationFrame(() => {
+                    frame = 0;
+                    motion.lookAtScreenPoint(event.clientX, event.clientY, FULL_LOOK_DISTANCE);
+                });
+            };
+            const handleLeave = () => {
+                cancelAnimationFrame(frame);
+                frame = 0;
+                motion.lookAt(0, 0, { stiffness: 14 });
+            };
 
-        return () => {
-            cancelAnimationFrame(frame);
-            section.removeEventListener("pointermove", handleMove);
-            section.removeEventListener("pointerleave", handleLeave);
-            motion.destroy();
-            motionRef.current = null;
-        };
+            section.addEventListener("pointermove", handleMove, { passive: true });
+            section.addEventListener("pointerleave", handleLeave);
+
+            return () => {
+                cancelAnimationFrame(frame);
+                section.removeEventListener("pointermove", handleMove);
+                section.removeEventListener("pointerleave", handleLeave);
+                motion.destroy();
+                motionRef.current = null;
+            };
+        });
+
+        return () => media.revert();
     }, []);
 
     useEffect(() => {
