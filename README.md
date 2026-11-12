@@ -13,21 +13,20 @@ This is my personal website and portfolio blog. It has both English and Russian 
 - MDX-based content
 - post search and newest-first publication order
 - custom page transitions
-- interactive sections built with `Three.js` and `GSAP`
+- interactive sections built with `GSAP`
 - centralized SEO metadata
 
 ## Stack
 
 Current main dependencies:
 
-- `next@16.2.4`
-- `react@19.2.5`
-- `react-dom@19.2.5`
+- `next@16.3.0`
+- `react@19.2.8`
+- `react-dom@19.2.8`
 - `typescript@5`
 - `next-intl@4.3.4`
 - `next-mdx-remote@6.0.0`
 - `sass@1.89.2`
-- `three@0.182.0`
 - `gsap@3.13.0`
 - `@gsap/react@2.1.2`
 - `swiper@12.0.3`
@@ -37,12 +36,10 @@ Current main dependencies:
 
 Development tools:
 
-- `eslint@9.33.0`
+- `eslint@9.39.1`
 - `prettier@3.6.2`
 - `stylelint@16.23.1`
 - `jest@30.0.5`
-- `playwright@1.54.1`
-- `storybook@9.0.18`
 
 ## Run locally
 
@@ -67,8 +64,6 @@ pnpm lint:css
 pnpm lint:css:fix
 pnpm type-check
 pnpm test
-pnpm storybook
-pnpm build-storybook
 pnpm format
 pnpm format:fix
 pnpm fix:all
