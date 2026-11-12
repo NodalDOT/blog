@@ -217,7 +217,8 @@ export const Workspace: FC = () => {
                             </pre>
 
                             <pre className={styles["workspace__code-typed"]}>
-                                <code ref={codeRef} className="language-javascript" />
+                                {/* Highlighted by typeWriter; avoid Prism's automatic DOM mutations. */}
+                                <code ref={codeRef} />
                             </pre>
                         </div>
 
