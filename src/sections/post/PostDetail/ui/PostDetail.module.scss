@@ -258,18 +258,26 @@
     }
 
     &__video-frame {
+        position: relative;
+
         overflow: hidden;
+
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        max-height: calc(100dvh - 14rem);
         border-radius: 0.8rem;
+
         background: var(--background-contrast-color);
     }
 
     &__video {
+        position: absolute;
+        inset: 0;
+
         display: block;
 
-        aspect-ratio: 16 / 9;
         width: 100%;
-        height: auto;
-        max-height: calc(100dvh - 14rem);
+        height: 100%;
 
         object-fit: contain;
         background: var(--background-contrast-color);

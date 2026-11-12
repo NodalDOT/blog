@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useId, type FC } from "react";
+import React, { useEffect, useLayoutEffect, useId, type FC } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.scss";
 import { classNames } from "@/shared/lib/classNames";
@@ -82,13 +82,18 @@ const Modal: FC<ModalProps> = (props) => {
         };
     }, [open, mounted]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!open || !mounted) return;
 
         const { overflow, paddingRight } = document.body.style;
         const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
         const currentPadding = Number.parseFloat(getComputedStyle(document.body).paddingRight) || 0;
 
+        // Keep the fixed backdrop aligned with the page, including during its exit fade.
+        modalRef.current?.parentElement?.style.setProperty(
+            "--modal-scrollbar-width",
+            `${scrollBarWidth}px`
+        );
         document.body.style.overflow = "hidden";
         document.body.style.paddingRight = `${currentPadding + scrollBarWidth}px`;
 
@@ -126,11 +131,7 @@ const Modal: FC<ModalProps> = (props) => {
             <div
                 ref={modalRef}
                 tabIndex={-1}
-                className={classNames(
-                    styles["modal__content"],
-                    open && styles["modal__content--open"],
-                    contentClassName
-                )}
+                className={classNames(styles["modal__content"], contentClassName)}
                 role="dialog"
                 aria-modal="true"
                 aria-label={title ? undefined : ariaLabel}

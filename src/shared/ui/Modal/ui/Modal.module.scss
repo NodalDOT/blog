@@ -1,11 +1,7 @@
 @use "@/shared/styles/utils/index" as *;
 
 .modal {
-    @include default-tr;
-
     &__backdrop {
-        @include default-tr;
-
         position: fixed;
         z-index: 1000;
         inset: 0;
@@ -14,23 +10,26 @@
         align-items: center;
         justify-content: center;
 
+        width: 100vw;
+        padding-right: var(--modal-scrollbar-width, 0);
+
         visibility: hidden;
         opacity: 0;
         background: rgb(0 0 0 / 50%);
 
-        transition-property: opacity, visibility;
+        transition:
+            opacity 160ms ease-out,
+            visibility 0s linear 160ms;
 
         &--visible {
             visibility: visible;
             opacity: 1;
+            transition-delay: 0s;
         }
     }
 
     &__content {
-        @include default-tr;
-
         position: relative;
-        transform: scale(0.95);
 
         overflow: auto;
 
@@ -39,17 +38,7 @@
         padding: 4.8rem;
         border-radius: 2.4rem;
 
-        visibility: hidden;
-        opacity: 0;
         background: var(--background-color);
-
-        transition-property: opacity, visibility, transform;
-
-        &--open {
-            transform: scale(1);
-            visibility: visible;
-            opacity: 1;
-        }
     }
 
     &__focus-guard {
@@ -122,13 +111,8 @@
 
     @media (prefers-reduced-motion: reduce) {
         &__backdrop,
-        &__content,
         &__close {
             transition: none;
-        }
-
-        &__content {
-            transform: none;
         }
     }
 }

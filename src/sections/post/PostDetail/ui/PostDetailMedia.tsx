@@ -16,20 +16,22 @@ interface PostDetailMediaProps {
     videoUrl: string;
 }
 
-const ProjectVideo = ({ src }: { src: string }) => {
+const ProjectVideo = ({ src, active }: { src: string; active: boolean }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
+        if (!active) return;
+
+        video.currentTime = 0;
         void video.play().catch(() => undefined);
 
         return () => {
             video.pause();
-            video.currentTime = 0;
         };
-    }, [src]);
+    }, [src, active]);
 
     return (
         <video
@@ -37,6 +39,7 @@ const ProjectVideo = ({ src }: { src: string }) => {
             className={styles["post-detail__video"]}
             src={src}
             tabIndex={0}
+            preload="none"
             controls
             playsInline
         />
@@ -115,7 +118,7 @@ export const PostDetailMedia = ({
                         contentClassName={styles["post-detail__video-modal"]}
                     >
                         <div className={styles["post-detail__video-frame"]}>
-                            {open && <ProjectVideo src={videoUrl} />}
+                            <ProjectVideo src={videoUrl} active={open} />
                         </div>
                     </Modal>
                 </>
