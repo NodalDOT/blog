@@ -154,17 +154,44 @@
             grid-template-columns: repeat(1, 1fr);
             gap: 1.2rem;
         }
+    }
 
-        > [data-visible="false"] {
-            pointer-events: none;
-            position: absolute;
-            transform: scale(0.95);
-            opacity: 0;
-        }
+    &__results {
+        view-transition-name: posts-results;
     }
 
     &__empty {
         margin: 0;
         color: var(--text-2-color);
+    }
+}
+
+@keyframes posts-results-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+:global(:root:active-view-transition-type(posts-filter)) {
+    view-transition-name: none;
+
+    &::view-transition {
+        pointer-events: none;
+    }
+
+    &::view-transition-group(posts-results) {
+        animation: none;
+    }
+
+    &::view-transition-old(posts-results),
+    &::view-transition-new(posts-results) {
+        width: 100%;
+        height: auto;
+        mix-blend-mode: normal;
+        animation: posts-results-fade 280ms ease-in-out both;
+    }
+
+    &::view-transition-old(posts-results) {
+        animation-direction: reverse;
     }
 }

@@ -10,6 +10,8 @@ import Search from "@/shared/ui/Search";
 import { usePostsFilter } from "@/features/posts/posts-filter";
 import { useTranslations } from "next-intl";
 
+import { useAnimatedPosts } from "../model/useAnimatedPosts";
+
 import { PostsGrid } from "./PostsGrid";
 import { ViewModeSwitch } from "./ViewModeSwitch";
 
@@ -22,6 +24,7 @@ const PostsFeed: FC<PostsFeedProps> = ({ posts }) => {
     const { query, setQuery, visiblePosts } = usePostsFilter({
         posts,
     });
+    const displayedPosts = useAnimatedPosts(visiblePosts);
     const [viewMode, setViewMode] = useState<ViewMode>("image");
 
     return (
@@ -41,17 +44,19 @@ const PostsFeed: FC<PostsFeedProps> = ({ posts }) => {
 
                 <div className={styles["posts-feed__results-bar"]}>
                     <p className={styles["posts-feed__count"]} role="status" aria-atomic="true">
-                        {t("results", { count: visiblePosts.length })}
+                        {t("results", { count: displayedPosts.length })}
                     </p>
                     <ViewModeSwitch value={viewMode} onChange={setViewMode} />
                 </div>
             </div>
 
-            {visiblePosts.length > 0 ? (
-                <PostsGrid posts={visiblePosts} viewMode={viewMode} />
-            ) : (
-                <p className={styles["posts-feed__empty"]}>{t("empty")}</p>
-            )}
+            <div className={styles["posts-feed__results"]}>
+                {displayedPosts.length > 0 ? (
+                    <PostsGrid posts={displayedPosts} viewMode={viewMode} />
+                ) : (
+                    <p className={styles["posts-feed__empty"]}>{t("empty")}</p>
+                )}
+            </div>
         </section>
     );
 };
