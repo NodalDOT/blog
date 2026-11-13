@@ -118,6 +118,7 @@
     }
 
     &__hero-media-meta {
+        @include font-size(meta);
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -125,8 +126,6 @@
 
         min-height: 100%;
         padding-block: 0.4rem;
-
-        @include font-size(meta);
 
         color: var(--text-2-color);
         text-transform: uppercase;
@@ -431,14 +430,13 @@
 
         h2,
         h3 {
+            @include default-tr;
             scroll-margin-top: calc(var(--header-height) + 2.4rem);
 
             margin-top: 3.2rem;
             border-radius: 0.8rem;
 
             letter-spacing: -0.03em;
-
-            @include default-tr;
 
             transition-property: background-color, box-shadow;
         }
@@ -529,10 +527,9 @@
         }
 
         :not(pre) > code {
+            @include font-size(body-code);
             padding: 0.2rem 0.6rem;
             border-radius: 0.8rem;
-
-            @include font-size(body-code);
 
             color: var(--text-contrast-color);
             overflow-wrap: anywhere;

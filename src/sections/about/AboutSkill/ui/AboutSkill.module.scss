@@ -70,6 +70,7 @@
     }
 
     &__lashes {
+        @include default-tr(scale, 0.6s);
         pointer-events: none;
 
         position: absolute;
@@ -81,8 +82,6 @@
         justify-content: center;
 
         visibility: hidden;
-
-        @include default-tr(scale, 0.6s);
 
         animation: about-skill-lashes-blink 6s infinite;
 
@@ -114,6 +113,8 @@
     &__sclera {
         @include default-tr($duration: 0.6s);
 
+        @include eye-sclera-volume(60cqw);
+
         position: relative;
 
         overflow: hidden;
@@ -129,14 +130,11 @@
 
         transition-property: clip-path;
         animation: about-skill-blink 6s infinite;
-
-        @include eye-sclera-volume(60cqw);
     }
 
     &__pupil {
-        flex-shrink: 0;
-
         @include eye-pupil-volume;
+        flex-shrink: 0;
 
         aspect-ratio: 1;
         width: 40%;
@@ -225,11 +223,10 @@
     }
 
     &__icon {
+        @include box(5.2rem);
         display: flex;
         align-items: center;
         justify-content: center;
-
-        @include box(5.2rem);
 
         border-radius: 50%;
 

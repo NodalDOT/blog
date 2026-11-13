@@ -6,6 +6,7 @@
 }
 
 .loader {
+    @include default-tr($duration: 0.4s, $timing-function: cubic-bezier(0.76, 0, 0.24, 1));
     pointer-events: none;
     will-change: transform, opacity;
 
@@ -15,8 +16,6 @@
     transform: translateX(100%);
 
     background-color: var(--background-color);
-
-    @include default-tr($duration: 0.4s, $timing-function: cubic-bezier(0.76, 0, 0.24, 1));
 
     transition-property: transform;
 

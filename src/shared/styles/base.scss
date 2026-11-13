@@ -20,13 +20,13 @@ html {
 body {
     --header-height: 9.6rem;
 
+    @include font-size(body);
+
     @include tablet {
         --header-height: 7.2rem;
     }
 
     overflow-x: hidden;
-
-    @include font-size(body);
 
     color: var(--text-color);
     background-color: var(--background-color);
@@ -84,9 +84,8 @@ h3 {
 }
 
 p {
-    color: var(--text-color);
-
     @include font-size(body);
+    color: var(--text-color);
 }
 
 button {
