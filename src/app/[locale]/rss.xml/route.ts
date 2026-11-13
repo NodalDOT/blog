@@ -1,5 +1,5 @@
 import { BASE_SEO } from "@/app/[locale]/seo";
-import { readPostFrontmatters } from "@/entities/post/api/readPostFrontmatters";
+import { getPosts } from "@/entities/post";
 import { routing } from "@/shared/i18n/routing";
 
 function isSupportedLocale(locale: string): locale is (typeof routing.locales)[number] {
@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ loc
     const baseUrl = BASE_SEO[locale].url;
     const feedUrl = `${baseUrl}/${locale}/rss.xml`;
     const siteUrl = `${baseUrl}/${locale}/posts`;
-    const posts = readPostFrontmatters(locale);
+    const posts = await getPosts(locale);
 
     const lastBuildDate = posts[0]?.date
         ? new Date(posts[0].date).toUTCString()

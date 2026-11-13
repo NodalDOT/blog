@@ -1,6 +1,6 @@
 import { routing } from "@/shared/i18n/routing";
 import { BASE_SEO } from "@/app/[locale]/seo";
-import { readPostFrontmatters } from "@/entities/post/api/readPostFrontmatters";
+import { getPosts, type Post } from "@/entities/post";
 
 const SITE_URL = BASE_SEO.en.url;
 const STATIC_PATHS = ["", "/about", "/posts"];
@@ -23,42 +23,44 @@ function escapeXml(value: string) {
         .replaceAll("'", "&apos;");
 }
 
-function getLatestPostDate(locale: string) {
-    return readPostFrontmatters(locale).reduce<string | undefined>((latest, post) => {
+function getLatestPostDate(posts: Post[]) {
+    return posts.reduce<string | undefined>((latest, post) => {
         const date = post.updated ?? post.date;
         return !latest || date > latest ? date : latest;
     }, undefined);
 }
 
-function getStaticEntries() {
-    return routing.locales.flatMap((locale) => {
-        const latest = getLatestPostDate(locale);
+function getStaticEntries(locale: string, posts: Post[]) {
+    const latest = getLatestPostDate(posts);
 
-        return STATIC_PATHS.map((pagePath) => {
-            // The listing pages change whenever a post does; /about has no such signal.
-            const tracksPosts = pagePath !== "/about";
+    return STATIC_PATHS.map((pagePath) => {
+        // The listing pages change whenever a post does; /about has no such signal.
+        const tracksPosts = pagePath !== "/about";
 
-            return {
-                url: `${SITE_URL}/${locale}${pagePath}`,
-                ...(latest && tracksPosts
-                    ? { lastModified: formatLastModified(new Date(latest)) }
-                    : {}),
-            } satisfies SitemapEntry;
-        });
+        return {
+            url: `${SITE_URL}/${locale}${pagePath}`,
+            ...(latest && tracksPosts
+                ? { lastModified: formatLastModified(new Date(latest)) }
+                : {}),
+        } satisfies SitemapEntry;
     });
 }
 
-function getPostEntries() {
-    return routing.locales.flatMap((locale) => {
-        return readPostFrontmatters(locale).map((post) => ({
-            url: `${SITE_URL}/${locale}/posts/${post.id}`,
-            lastModified: formatLastModified(new Date(post.updated ?? post.date)),
-        }));
-    });
+function getPostEntries(locale: string, posts: Post[]) {
+    return posts.map((post) => ({
+        url: `${SITE_URL}/${locale}/posts/${post.id}`,
+        lastModified: formatLastModified(new Date(post.updated ?? post.date)),
+    }));
 }
 
-export function GET() {
-    const entries: SitemapEntry[] = [...getStaticEntries(), ...getPostEntries()];
+export async function GET() {
+    const localizedEntries = await Promise.all(
+        routing.locales.map(async (locale) => {
+            const posts = await getPosts(locale);
+            return [...getStaticEntries(locale, posts), ...getPostEntries(locale, posts)];
+        })
+    );
+    const entries: SitemapEntry[] = localizedEntries.flat();
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

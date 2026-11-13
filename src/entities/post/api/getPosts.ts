@@ -1,13 +1,11 @@
-import { readPostFrontmatters } from "./readPostFrontmatters";
+import { getPost, getPostSlugs } from "./getPost";
+import type { Post } from "../model/types";
 
 export async function getPosts(locale: string) {
-    return readPostFrontmatters(locale).map((post) => ({
-        id: post.id,
-        title: post.title,
-        subtitle: post.subtitle,
-        image: { src: post.imageSrc, alt: post.imageAlt },
-        videoUrl: post.videoUrl,
+    const modules = await Promise.all(getPostSlugs(locale).map((slug) => getPost(locale, slug)));
 
-        date: post.date,
-    }));
+    return modules
+        .filter((module) => module !== undefined)
+        .map(({ post }): Post => post)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

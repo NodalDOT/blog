@@ -1,11 +1,11 @@
-# Nodal-dot Blog
+# NodalDOT Blog
 
 This is my personal website and portfolio blog. It has both English and Russian content, a small custom design system, and a few interactive sections that I built by hand instead of dropping in a ready-made template.
 
 ## Links
 
 - Site: `https://nodaldot.space/`
-- Repository: `https://github.com/Nodal-dot/blog`
+- Repository: `https://github.com/NodalDOT/blog`
 
 ## What this project includes
 
@@ -20,31 +20,30 @@ This is my personal website and portfolio blog. It has both English and Russian 
 
 Current main dependencies:
 
-- `next@16.3.0`
-- `react@19.2.8`
-- `react-dom@19.2.8`
-- `typescript@5`
-- `next-intl@4.3.4`
-- `next-mdx-remote@6.0.0`
-- `sass@1.89.2`
-- `gsap@3.13.0`
+- `next@16.4.6`
+- `react@19.3.1`
+- `react-dom@19.3.1`
+- `typescript@6.0.3`
+- `next-intl@4.15.1`
+- `@next/mdx@16.4.6`
+- `sass@1.108.2`
+- `gsap@3.15.1`
 - `@gsap/react@2.1.2`
-- `swiper@12.0.3`
-- `gray-matter@4.0.3`
+- `swiper@14.4.0`
 - `remark-gfm@4.0.1`
 - `prismjs@1.30.0`
 
 Development tools:
 
-- `eslint@9.39.1`
-- `prettier@3.6.2`
-- `stylelint@16.23.1`
-- `jest@30.0.5`
+- `eslint@9.39.5`
+- `prettier@3.10.1`
+- `stylelint@17.16.0`
+- `jest@30.5.2`
 
 ## Run locally
 
 ```bash
-git clone https://github.com/Nodal-dot/blog.git
+git clone https://github.com/NodalDOT/blog.git
 cd blog
 pnpm install
 pnpm dev

@@ -1,11 +1,5 @@
 export type ClassValue =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ClassValue[]
-    | { [key: string]: boolean };
+    string | number | boolean | null | undefined | ClassValue[] | { [key: string]: boolean };
 
 export function classNames(...args: ClassValue[]): string {
     const classes: string[] = [];

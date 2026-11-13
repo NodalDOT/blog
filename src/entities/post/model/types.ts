@@ -8,3 +8,11 @@ export interface Post {
     date: string;
     updated?: string;
 }
+
+export type PostMetadata = Omit<Post, "id">;
+
+export interface PostTocItem {
+    id: string;
+    title: string;
+    children: PostTocItem[];
+}
