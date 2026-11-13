@@ -4,6 +4,21 @@
     position: relative;
     flex-shrink: 0;
 
+    @media (hover: hover) and (pointer: fine) {
+        &:hover &__options,
+        &:focus-within &__options {
+            pointer-events: auto;
+            opacity: 1;
+        }
+    }
+
+    @media (hover: none), (pointer: coarse) {
+        &:focus-within &__options {
+            pointer-events: auto;
+            opacity: 1;
+        }
+    }
+
     &__trigger {
         @include default-tr;
 
@@ -99,21 +114,6 @@
                     opacity: 0.5;
                 }
             }
-        }
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-        &:hover &__options,
-        &:focus-within &__options {
-            pointer-events: auto;
-            opacity: 1;
-        }
-    }
-
-    @media (hover: none), (pointer: coarse) {
-        &:focus-within &__options {
-            pointer-events: auto;
-            opacity: 1;
         }
     }
 }

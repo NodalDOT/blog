@@ -53,15 +53,7 @@ export const MobileMenu: FC<MobileMenuProps> = (props) => {
                                     href={href}
                                     className={styles["mobile-menu__link"]}
                                     aria-current={pathname === href ? "page" : undefined}
-                                    onClick={(event) => {
-                                        if (
-                                            event.metaKey ||
-                                            event.ctrlKey ||
-                                            event.shiftKey ||
-                                            event.altKey ||
-                                            event.button !== 0
-                                        )
-                                            return;
+                                    onNavigate={(event) => {
                                         event.preventDefault();
                                         startTransition(href);
                                         closeModal();

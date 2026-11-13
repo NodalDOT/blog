@@ -33,6 +33,12 @@
 
     background: var(--background-color);
 
+    @media (prefers-color-scheme: dark) {
+        :global(html:not([data-theme])) & {
+            @include dark-theme;
+        }
+    }
+
     &__label-dark,
     &__label-light {
         @include visually-hidden;
@@ -83,11 +89,5 @@
 
     :global(html[data-theme="dark"]) & {
         @include dark-theme;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        :global(html:not([data-theme])) & {
-            @include dark-theme;
-        }
     }
 }

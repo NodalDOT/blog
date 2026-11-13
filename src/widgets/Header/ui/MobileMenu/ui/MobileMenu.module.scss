@@ -118,23 +118,19 @@
     }
 
     &__number {
+        @include font-size(navigation-number);
+
         flex-shrink: 0;
         align-self: flex-start;
-
         padding-top: 0.4rem;
-
-        font-size: 1.2rem;
         font-variant-numeric: tabular-nums;
     }
 
     &__label {
+        @include font-size(navigation-label);
+
         flex: 1;
-
         min-width: 0;
-
-        font-size: clamp(2.4rem, 4vw, 3.6rem);
-        font-weight: 600;
-        line-height: 1.2;
         overflow-wrap: anywhere;
     }
 
@@ -143,12 +139,12 @@
         width: 2.4rem;
         height: 2.4rem;
     }
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        &__link,
-        &__line,
-        &__trigger {
-            transition: none;
-        }
+@media (prefers-reduced-motion: reduce) {
+    .mobile-menu__link,
+    .mobile-menu__line,
+    .mobile-menu__trigger {
+        transition: none;
     }
 }
