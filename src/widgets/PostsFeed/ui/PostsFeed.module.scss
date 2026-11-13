@@ -7,6 +7,14 @@
     flex-direction: column;
     gap: 3.2rem;
 
+    @include tablet {
+        gap: 2.4rem;
+    }
+
+    @include mobile {
+        gap: 1.6rem;
+    }
+
     &__intro {
         display: flex;
         flex-direction: column;
@@ -26,14 +34,6 @@
     &__description {
         margin: 0;
         color: var(--text-2-color);
-    }
-
-    @include tablet {
-        gap: 2.4rem;
-    }
-
-    @include mobile {
-        gap: 1.6rem;
     }
 
     &__toolbar {
@@ -103,6 +103,10 @@
 
         transition-property: color, background-color;
 
+        @include mobile {
+            padding: 0.8rem;
+        }
+
         &:hover:not([aria-pressed="true"]) {
             color: var(--text-color);
             background-color: var(--hover-background-color);
@@ -111,10 +115,6 @@
         &[aria-pressed="true"] {
             color: var(--text-contrast-color);
             background-color: var(--background-contrast-color);
-        }
-
-        @include mobile {
-            padding: 0.8rem;
         }
     }
 
