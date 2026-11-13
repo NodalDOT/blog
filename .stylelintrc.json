@@ -9,6 +9,21 @@
             {
                 "ignorePseudoClasses": ["global"]
             }
+        ],
+        "order/order": [
+            "dollar-variables",
+            "custom-properties",
+            {
+                "type": "at-rule",
+                "name": "include",
+                "hasBlock": false
+            },
+            "declarations",
+            {
+                "type": "at-rule",
+                "hasBlock": true
+            },
+            "rules"
         ]
     }
 }
