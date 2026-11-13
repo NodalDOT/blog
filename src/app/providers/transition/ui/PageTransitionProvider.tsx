@@ -11,6 +11,7 @@ import {
     useMemo,
     type ReactNode,
 } from "react";
+import { useLocale } from "next-intl";
 import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "@/shared/i18n/navigation";
 import { classNames } from "@/shared/lib/classNames";
@@ -37,12 +38,14 @@ const PageTransitionStateContext = createContext<IPageTransitionState>({
 export const PageTransitionProvider = ({ children }: { children: ReactNode }) => {
     const { push } = useRouter();
     const pathname = usePathname();
+    const currentLocale = useLocale();
+    const routeKey = `${currentLocale}:${pathname}`;
 
     const [isPending, startReactTransition] = useTransition();
     const [isAnimating, setIsAnimating] = useState(false);
     const [mounted, setMounted] = useState(false);
 
-    const savedPathname = useRef(pathname);
+    const savedPathname = useRef(routeKey);
     const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pendingNavigationRef = useRef<(() => void) | null>(null);
 
@@ -54,8 +57,8 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
     useEffect(() => {
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-        if (savedPathname.current !== pathname) {
-            savedPathname.current = pathname;
+        if (savedPathname.current !== routeKey) {
+            savedPathname.current = routeKey;
             timeoutId = setTimeout(() => setIsAnimating(false), 100);
         }
 
@@ -64,7 +67,7 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
                 clearTimeout(timeoutId);
             }
         };
-    }, [pathname]);
+    }, [routeKey]);
 
     const isAnimatingRef = useRef(isAnimating);
     useEffect(() => {
@@ -99,7 +102,7 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
     const startTransition = useCallback(
         (to: string, locale?: string) => {
             if (isAnimatingRef.current) return;
-            if (to === pathname) return;
+            if (to === pathname && (!locale || locale === currentLocale)) return;
 
             const navigate = () => {
                 startReactTransition(() => {
@@ -125,7 +128,7 @@ export const PageTransitionProvider = ({ children }: { children: ReactNode }) =>
                 navigate();
             }, 400);
         },
-        [pathname, push, startReactTransition]
+        [pathname, currentLocale, push, startReactTransition]
     );
 
     const actionsValue = useMemo(() => ({ startTransition }), [startTransition]);

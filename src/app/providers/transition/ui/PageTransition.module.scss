@@ -7,6 +7,7 @@
 
 .loader {
     @include default-tr($duration: 0.4s, $timing-function: cubic-bezier(0.76, 0, 0.24, 1));
+
     pointer-events: none;
     will-change: transform, opacity;
 
@@ -19,13 +20,13 @@
 
     transition-property: transform;
 
-    &--active {
-        transform: translateX(0%);
-    }
-
     @media (prefers-reduced-motion: reduce) {
         display: none;
         transition: none;
+    }
+
+    &--active {
+        transform: translateX(0%);
     }
 }
 
