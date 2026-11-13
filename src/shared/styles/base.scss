@@ -8,6 +8,7 @@ html {
     @include root-fonts;
 
     scroll-behavior: smooth;
+    background-color: var(--background-color);
 }
 
 @media (prefers-reduced-motion: reduce) {

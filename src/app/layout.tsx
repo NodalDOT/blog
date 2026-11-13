@@ -1,5 +1,4 @@
 import { Montserrat } from "next/font/google";
-import Script from "next/script";
 import { getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -18,15 +17,16 @@ const montserrat = Montserrat({
     display: "swap",
 });
 const themeInitScript = `(() => {
+    let stored;
     try {
-        const stored = localStorage.getItem("theme");
-        const systemTheme = typeof window.matchMedia === "function"
-            && window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        const theme = stored === "light" || stored === "dark" ? stored : systemTheme;
-        document.documentElement.setAttribute("data-theme", theme);
+        stored = localStorage.getItem("theme");
     } catch {}
+    const systemTheme = typeof window.matchMedia === "function"
+        && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    const theme = stored === "light" || stored === "dark" ? stored : systemTheme;
+    document.documentElement.setAttribute("data-theme", theme);
 })();`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -34,12 +34,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
     return (
         <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
-            <body className={`${montserrat.variable} ${montserrat.className}`}>
-                <Script id="theme-init" strategy="beforeInteractive">
-                    {themeInitScript}
-                </Script>
-                {children}
-            </body>
+            <head>
+                <meta name="color-scheme" content="light dark" />
+                <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+            </head>
+            <body className={`${montserrat.variable} ${montserrat.className}`}>{children}</body>
         </html>
     );
 }
