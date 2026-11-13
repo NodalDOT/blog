@@ -9,6 +9,7 @@ export type IconName =
     | "graduation-cap"
     | "x"
     | "play"
+    | "arrow-up-right"
     | "arrow-up"
     | "arrow-down"
     | "arrow-left"
@@ -69,6 +70,7 @@ export const ICON_PATHS: Record<IconName, ReactNode> = {
             stroke="none"
         />
     ),
+    "arrow-up-right": <path d="M7 17 17 7M7 7h10v10" />,
     "arrow-up": (
         <>
             <path d="m5 12 7-7 7 7" />
