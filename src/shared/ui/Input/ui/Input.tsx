@@ -1,4 +1,4 @@
-import React, { type FC, type InputHTMLAttributes, useId } from "react";
+import React, { type FC, type InputHTMLAttributes, useId, useState } from "react";
 import styles from "./Input.module.scss";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -17,9 +17,14 @@ export const Input: FC<InputProps> = ({
 }) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
+    const [pointerFocus, setPointerFocus] = useState(false);
 
     return (
-        <div className={styles["input"]}>
+        <div
+            className={styles["input"]}
+            onPointerDownCapture={() => setPointerFocus(true)}
+            onBlurCapture={() => setPointerFocus(false)}
+        >
             {label && (
                 <label
                     htmlFor={inputId}
@@ -33,6 +38,7 @@ export const Input: FC<InputProps> = ({
                 <input
                     id={inputId}
                     {...props}
+                    data-pointer-focus={pointerFocus || undefined}
                     className={`${styles["input__field"]} ${className || ""}`}
                 />
             </div>
