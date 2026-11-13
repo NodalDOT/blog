@@ -26,6 +26,39 @@
         gap: 1.6rem;
     }
 
+    @keyframes glitch {
+        0%,
+        15% {
+            text-shadow:
+                0.05em 0 var(--skill-line-active-color),
+                -0.03em -0.04em var(--hover-text-color),
+                0.025em 0.04em var(--text-2-color);
+        }
+
+        16%,
+        49% {
+            text-shadow:
+                -0.05em -0.025em var(--skill-line-active-color),
+                0.025em 0.035em var(--hover-text-color),
+                -0.05em -0.05em var(--text-2-color);
+        }
+
+        50%,
+        99% {
+            text-shadow:
+                0.05em 0.035em var(--skill-line-active-color),
+                0.03em 0 var(--hover-text-color),
+                0 -0.04em var(--text-2-color);
+        }
+
+        100% {
+            text-shadow:
+                -0.05em 0 var(--skill-line-active-color),
+                -0.025em -0.04em var(--hover-text-color),
+                -0.04em -0.025em var(--text-2-color);
+        }
+    }
+
     &__glitch {
         @include font-size(glitch);
 
@@ -103,57 +136,24 @@
             background: var(--text-contrast-color);
         }
     }
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        &__glitch,
-        &__glitch span {
-            transform: none;
-            text-shadow: none;
-            animation: none;
-        }
-
-        &__glitch span,
-        &__grid {
-            display: none;
-        }
-
-        &__button,
-        &__button--ghost {
-            opacity: 1;
-            transition: none;
-        }
+@media (prefers-reduced-motion: reduce) {
+    .not-found__glitch,
+    .not-found__glitch span {
+        transform: none;
+        text-shadow: none;
+        animation: none;
     }
 
-    @keyframes glitch {
-        0%,
-        15% {
-            text-shadow:
-                0.05em 0 var(--skill-line-active-color),
-                -0.03em -0.04em var(--hover-text-color),
-                0.025em 0.04em var(--text-2-color);
-        }
+    .not-found__glitch span,
+    .not-found__grid {
+        display: none;
+    }
 
-        16%,
-        49% {
-            text-shadow:
-                -0.05em -0.025em var(--skill-line-active-color),
-                0.025em 0.035em var(--hover-text-color),
-                -0.05em -0.05em var(--text-2-color);
-        }
-
-        50%,
-        99% {
-            text-shadow:
-                0.05em 0.035em var(--skill-line-active-color),
-                0.03em 0 var(--hover-text-color),
-                0 -0.04em var(--text-2-color);
-        }
-
-        100% {
-            text-shadow:
-                -0.05em 0 var(--skill-line-active-color),
-                -0.025em -0.04em var(--hover-text-color),
-                -0.04em -0.025em var(--text-2-color);
-        }
+    .not-found__button,
+    .not-found__button--ghost {
+        opacity: 1;
+        transition: none;
     }
 }
