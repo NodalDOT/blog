@@ -69,12 +69,12 @@
         opacity: 0;
         transition-property: opacity;
 
-        &.is-visible {
-            opacity: 1;
-        }
-
         @include mobile {
             display: none;
+        }
+
+        &.is-visible {
+            opacity: 1;
         }
     }
 
@@ -148,23 +148,23 @@
 
         background: var(--background-contrast-color);
     }
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        &__ball,
-        &__progress {
-            display: none;
-            transition: none;
-        }
+@media (prefers-reduced-motion: reduce) {
+    .about-path__ball,
+    .about-path__progress {
+        display: none;
+        transition: none;
+    }
 
-        &__item,
-        &__item.is-active {
-            transform: none;
-            opacity: 1;
-            transition: none;
-        }
+    .about-path__item,
+    .about-path__item.is-active {
+        transform: none;
+        opacity: 1;
+        transition: none;
+    }
 
-        &__card {
-            transition: none;
-        }
+    .about-path__card {
+        transition: none;
     }
 }
