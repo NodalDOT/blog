@@ -71,6 +71,7 @@
 
     &__lashes {
         @include default-tr(scale, 0.6s);
+
         pointer-events: none;
 
         position: absolute;
@@ -134,6 +135,7 @@
 
     &__pupil {
         @include eye-pupil-volume;
+
         flex-shrink: 0;
 
         aspect-ratio: 1;
@@ -157,14 +159,13 @@
         @include font-size(h3);
 
         min-height: 1.2em;
+        margin: 0;
+        color: var(--text-contrast-color);
+        text-align: center;
 
         @include mobile {
             @include font-size(h4);
         }
-
-        margin: 0;
-        color: var(--text-contrast-color);
-        text-align: center;
     }
 
     &__caption-text {
@@ -206,6 +207,10 @@
 
         transition-property: transform, background-color, color;
 
+        @include mobile {
+            padding: 1.2rem 0.4rem;
+        }
+
         &:focus-visible {
             outline: 2px solid var(--text-color);
             outline-offset: 4px;
@@ -216,14 +221,11 @@
             color: var(--text-contrast-color);
             background-color: var(--background-contrast-color);
         }
-
-        @include mobile {
-            padding: 1.2rem 0.4rem;
-        }
     }
 
     &__icon {
         @include box(5.2rem);
+
         display: flex;
         align-items: center;
         justify-content: center;
@@ -232,14 +234,14 @@
 
         background-color: #f5f5f5;
 
-        > img {
-            @include box(3.2rem);
-        }
-
         @include mobile {
             @include box(4.4rem);
+        }
 
-            > img {
+        > img {
+            @include box(3.2rem);
+
+            @include mobile {
                 @include box(2.6rem);
             }
         }
@@ -253,30 +255,30 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        &__sclera,
-        &__pupil,
-        &__lashes,
-        &__caption-text {
-            animation: none;
+@media (prefers-reduced-motion: reduce) {
+    .about-skill__sclera,
+    .about-skill__pupil,
+    .about-skill__lashes,
+    .about-skill__caption-text {
+        animation: none;
+    }
+
+    .about-skill__pupil,
+    .about-skill__sclera,
+    .about-skill__lashes,
+    .about-skill__item {
+        transition: none;
+    }
+
+    .about-skill__eye--focused {
+        .about-skill__sclera {
+            clip-path: ellipse(50% 50% at 50% 50%);
         }
 
-        &__pupil,
-        &__sclera,
-        &__lashes,
-        &__item {
-            transition: none;
-        }
-
-        &__eye--focused {
-            .about-skill__sclera {
-                clip-path: ellipse(50% 50% at 50% 50%);
-            }
-
-            .about-skill__lashes {
-                scale: none;
-            }
+        .about-skill__lashes {
+            scale: none;
         }
     }
 }
