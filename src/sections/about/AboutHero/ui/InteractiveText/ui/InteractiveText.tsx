@@ -36,7 +36,7 @@ export const InteractiveText: FC = () => {
                 <Button
                     as="a"
                     href="/posts"
-                    onClick={(e) => {
+                    onNavigate={(e) => {
                         e.preventDefault();
                         startTransition("/posts");
                     }}

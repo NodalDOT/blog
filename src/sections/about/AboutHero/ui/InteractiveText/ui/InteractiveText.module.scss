@@ -11,13 +11,13 @@
 
     overflow-wrap: anywhere;
 
+    @include tablet {
+        align-items: center;
+    }
+
     > * {
         min-width: 0;
         max-width: 100%;
-    }
-
-    @include tablet {
-        align-items: center;
     }
 
     &__paragraph {
