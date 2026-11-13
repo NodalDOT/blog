@@ -17,6 +17,7 @@ export type ButtonAsButton = BaseButtonProps & {
 
 export type ButtonAsLink = BaseButtonProps & {
     as: "a";
+    onNavigate?: (event: { preventDefault: () => void }) => void;
     href: string;
 } & AnchorHTMLAttributes<HTMLAnchorElement>;
 

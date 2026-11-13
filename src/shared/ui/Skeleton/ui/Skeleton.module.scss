@@ -10,6 +10,12 @@
 
     background: var(--active-background-color);
 
+    @keyframes skeleton {
+        to {
+            transform: translateX(100%);
+        }
+    }
+
     &__shimmer {
         position: absolute;
         inset: 0;
@@ -18,11 +24,5 @@
         background: linear-gradient(90deg, transparent, rgb(255 255 255 / 60%), transparent);
 
         animation: skeleton 1.4s infinite;
-    }
-
-    @keyframes skeleton {
-        to {
-            transform: translateX(100%);
-        }
     }
 }

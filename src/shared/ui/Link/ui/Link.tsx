@@ -12,7 +12,7 @@ interface LinkProps {
 
 const Link: React.FC<LinkProps> = (props) => {
     const { href, label, isActive, onClick } = props;
-    const triggerNavigationCallback = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const triggerNavigationCallback = (e: { preventDefault: () => void }) => {
         if (!onClick) return;
 
         e.preventDefault();
@@ -21,7 +21,7 @@ const Link: React.FC<LinkProps> = (props) => {
     return (
         <LocaleLink
             href={href}
-            onClick={triggerNavigationCallback}
+            onNavigate={triggerNavigationCallback}
             aria-current={isActive ? "page" : undefined}
             className={classNames(styles["link"], isActive && styles["active"])}
         >

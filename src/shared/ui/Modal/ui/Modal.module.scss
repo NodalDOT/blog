@@ -64,12 +64,10 @@
     }
 
     &__title {
+        @include font-size(modal-title);
+
         min-width: 0;
         margin: 0 auto 0 0;
-
-        font-size: 1.8rem;
-        font-weight: 600;
-        line-height: 1.4;
         overflow-wrap: anywhere;
     }
 
@@ -108,11 +106,11 @@
             outline-offset: 3px;
         }
     }
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        &__backdrop,
-        &__close {
-            transition: none;
-        }
+@media (prefers-reduced-motion: reduce) {
+    .modal__backdrop,
+    .modal__close {
+        transition: none;
     }
 }

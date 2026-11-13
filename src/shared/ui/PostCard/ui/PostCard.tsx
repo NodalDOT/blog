@@ -37,7 +37,8 @@ const PostCard: FC<PostCardProps> = ({
         <article data-id={id} className={classNames(styles["post-card"])} {...otherProps}>
             <Link
                 href={`/posts/${id}`}
-                onClick={() => {
+                onNavigate={(event) => {
+                    event.preventDefault();
                     startTransition(`/posts/${id}`);
                 }}
                 className={styles["post-card__link"]}
