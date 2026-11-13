@@ -3,9 +3,9 @@ import type { Locale } from "@/shared/i18n/types";
 import { notFound } from "next/navigation";
 import { getPost } from "@/entities/post/api/getPost";
 import PostDetail from "@/sections/post/PostDetail";
-import { createPageMetadata } from "../../metadata";
+import { createPageMetadata } from "@/app/[locale]/metadata";
 import { getTranslations } from "next-intl/server";
-import { BASE_SEO, resolveAbsoluteAssetUrl } from "../../seo";
+import { BASE_SEO, resolveAbsoluteAssetUrl } from "@/app/[locale]/seo";
 import { assertDefined } from "@/shared/lib/assert";
 
 export async function generateMetadata({

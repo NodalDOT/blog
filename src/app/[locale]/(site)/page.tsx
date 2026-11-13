@@ -1,4 +1,4 @@
-import { createPageMetadata } from "./metadata";
+import { createPageMetadata } from "@/app/[locale]/metadata";
 import type { Metadata } from "next";
 import type { Locale } from "@/shared/i18n/types";
 import { hasLocale } from "next-intl";
@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/shared/i18n/routing";
 import MainHero from "@/sections/main/MainHero";
 import MainPosts from "@/sections/main/MainPosts";
-import { BASE_SEO, resolveAbsoluteAssetUrl } from "./seo";
+import { BASE_SEO, resolveAbsoluteAssetUrl } from "@/app/[locale]/seo";
 
 interface MainPageProps {
     params: Promise<{ locale: Locale }>;

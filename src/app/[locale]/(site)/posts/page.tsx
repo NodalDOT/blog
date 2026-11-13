@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import type { Locale } from "@/shared/i18n/types";
 import type { FC } from "react";
 import { getTranslations } from "next-intl/server";
-import { createPageMetadata } from "../metadata";
+import { createPageMetadata } from "@/app/[locale]/metadata";
 
 interface PostsPageProps {
     params: Promise<{ locale: Locale }>;

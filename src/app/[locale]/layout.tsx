@@ -1,9 +1,6 @@
 import { NextIntlClientProvider, hasLocale, type Locale } from "next-intl";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/shared/i18n/routing";
-import Header from "@/widgets/Header";
-import Footer from "@/widgets/Footer";
 import type { ReactNode } from "react";
 import type { Viewport } from "next";
 import LocaleHtmlLang from "./LocaleHtmlLang";
@@ -26,25 +23,12 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
     if (!hasLocale(routing.locales, locale)) notFound();
 
-    const t = await getTranslations({ locale, namespace: "SkipLink" });
-
     return (
         <NextIntlClientProvider locale={locale}>
             <LocaleHtmlLang locale={locale} />
             <ThemeProvider>
                 <PageTransitionProvider>
-                    <ResponsiveProvider>
-                        <a href="#main-content" className="skip-link">
-                            {t("label")}
-                        </a>
-                        <div className="container">
-                            <Header />
-                            <main id="main-content" tabIndex={-1}>
-                                {children}
-                            </main>
-                            <Footer />
-                        </div>
-                    </ResponsiveProvider>
+                    <ResponsiveProvider>{children}</ResponsiveProvider>
                 </PageTransitionProvider>
             </ThemeProvider>
         </NextIntlClientProvider>

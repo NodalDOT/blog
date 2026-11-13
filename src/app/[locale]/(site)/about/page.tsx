@@ -4,9 +4,9 @@ import AboutSkill from "@/sections/about/AboutSkill";
 import type { Metadata } from "next";
 import type { FC } from "react";
 import { getTranslations } from "next-intl/server";
-import { createPageMetadata } from "../metadata";
+import { createPageMetadata } from "@/app/[locale]/metadata";
 import type { Locale } from "@/shared/i18n/types";
-import { BASE_SEO } from "../seo";
+import { BASE_SEO } from "@/app/[locale]/seo";
 import { SKILLS } from "@/sections/about/AboutSkill/utils/skills";
 
 interface AboutPageProps {
