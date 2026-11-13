@@ -43,7 +43,7 @@
 
         visibility: hidden;
 
-        transition: scale 0.6s ease;
+        @include default-tr(scale, 0.6s);
     }
 
     &__eyelash {
@@ -89,7 +89,7 @@
 
         clip-path: ellipse(50% 50% at 50% 50%);
 
-        transition: clip-path 0.6s ease;
+        @include default-tr(clip-path, 0.6s);
 
         @include eye-sclera-volume(18rem);
     }

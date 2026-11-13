@@ -438,9 +438,9 @@
 
             letter-spacing: -0.03em;
 
-            transition:
-                background-color 0.3s ease,
-                box-shadow 0.3s ease;
+            @include default-tr;
+
+            transition-property: background-color, box-shadow;
         }
 
         h2:target,
@@ -603,7 +603,7 @@
         @media (prefers-reduced-motion: reduce) {
             h2,
             h3 {
-                transition: background-color 0.15s ease;
+                @include default-tr(background-color, 0.15s);
             }
 
             h2:target,

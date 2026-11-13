@@ -1,3 +1,5 @@
+@use "@/shared/styles/utils/index" as *;
+
 .wrapper {
     position: relative;
     min-height: 100vh;
@@ -14,7 +16,9 @@
 
     background-color: var(--background-color);
 
-    transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+    @include default-tr($duration: 0.4s, $timing-function: cubic-bezier(0.76, 0, 0.24, 1));
+
+    transition-property: transform;
 
     &--active {
         transform: translateX(0%);

@@ -84,6 +84,8 @@
     }
 
     &__link {
+        @include default-tr($duration: 160ms);
+
         display: flex;
         gap: 1.6rem;
         align-items: center;
@@ -98,9 +100,7 @@
 
         background: var(--background-color);
 
-        transition:
-            background-color 160ms ease,
-            color 160ms ease;
+        transition-property: background-color, color;
 
         &:hover {
             background: var(--hover-background-color);

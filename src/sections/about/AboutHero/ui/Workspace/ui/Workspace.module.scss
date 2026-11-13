@@ -144,7 +144,7 @@
         background: var(--light-gradient);
         clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
 
-        transition: opacity 0.5s ease;
+        @include default-tr(opacity, 0.5s);
 
         @include mobile {
             display: none;

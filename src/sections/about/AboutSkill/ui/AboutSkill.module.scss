@@ -82,7 +82,8 @@
 
         visibility: hidden;
 
-        transition: scale 0.6s ease;
+        @include default-tr(scale, 0.6s);
+
         animation: about-skill-lashes-blink 6s infinite;
 
         > span {
