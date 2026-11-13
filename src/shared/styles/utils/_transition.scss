@@ -2,12 +2,12 @@
 @use "sass:meta";
 
 @mixin default-tr($properties: all, $duration: 0.3s, $timing-function: ease, $delay: 0s) {
+    transition: $properties $duration $timing-function $delay;
+
     @if $properties == transform or
         (meta.type-of($properties) == list and list.index($properties, transform))
     {
         transform: translateZ(0);
         backface-visibility: hidden;
     }
-
-    transition: $properties $duration $timing-function $delay;
 }

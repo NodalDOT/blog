@@ -22,14 +22,13 @@ body {
 
     @include font-size(body);
 
+    overflow-x: hidden;
+    color: var(--text-color);
+    background-color: var(--background-color);
+
     @include tablet {
         --header-height: 7.2rem;
     }
-
-    overflow-x: hidden;
-
-    color: var(--text-color);
-    background-color: var(--background-color);
 }
 
 .container {
@@ -85,6 +84,7 @@ h3 {
 
 p {
     @include font-size(body);
+
     color: var(--text-color);
 }
 
