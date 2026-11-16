@@ -2,6 +2,7 @@ import type { Post } from "@/entities/post";
 import type { TocItem } from "../model/types";
 
 import styles from "./PostDetail.module.scss";
+import contentStyles from "./PostContent.module.scss";
 import { classNames } from "@/shared/lib/classNames";
 import { PostScrollProgress } from "./PostScrollProgress";
 import { PostBackLink } from "./PostBackLink";
@@ -32,36 +33,31 @@ export const PostDetail: React.FC<PostDetailProps> = ({
             <PostScrollProgress />
 
             <header className={styles["post-detail__hero"]}>
-                <PostDetailMedia
-                    postId={post.id}
-                    date={post.date}
-                    imageSrc={post.image.src}
-                    imageAlt={post.image.alt}
-                    videoUrl={post.videoUrl}
-                />
+                <div className={styles["post-detail__hero-meta"]}>
+                    <PostBackLink label={backLabel} />
+
+                    <p className={styles["post-detail__published"]}>
+                        <span>{publishedLabel}</span>
+                        <time dateTime={post.date}>{publishedDate}</time>
+                    </p>
+                </div>
 
                 <div className={styles["post-detail__hero-content"]}>
-                    <div className={styles["post-detail__hero-meta"]}>
-                        <PostBackLink label={backLabel} />
-
-                        <p className={styles["post-detail__published"]}>
-                            <span>{publishedLabel}</span>
-                            <time dateTime={post.date}>{publishedDate}</time>
-                        </p>
-                    </div>
-
                     <h1 className={styles["post-detail__title"]}>{post.title}</h1>
 
                     {post.subtitle && (
                         <p className={styles["post-detail__subtitle"]}>{post.subtitle}</p>
                     )}
                 </div>
+                <PostDetailMedia post={post} />
             </header>
 
-            <div className={styles["post-detail__content-layout"]}>
-                <div className={styles["post-detail__content"]}>{content}</div>
-
+            <div className={styles["post-detail__content-layout"]} data-has-toc={toc.length > 0}>
                 {toc.length > 0 && <PostToc toc={toc} label={tocLabel} />}
+
+                <div className={contentStyles["post-content"]} data-post-content>
+                    {content}
+                </div>
             </div>
         </article>
     );

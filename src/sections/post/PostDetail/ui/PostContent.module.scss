@@ -1,0 +1,248 @@
+@use "@/shared/styles/utils/index" as *;
+
+@keyframes post-heading-target-highlight {
+    0% {
+        background-color: color-mix(in srgb, var(--text-color) 16%, transparent);
+        box-shadow: 0 0 0 0.8rem color-mix(in srgb, var(--text-color) 12%, transparent);
+    }
+
+    100% {
+        background-color: transparent;
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+.post-content {
+    @include font-size(article-body);
+
+    grid-area: content;
+
+    width: 100%;
+    min-width: 0;
+
+    text-align: start;
+    word-spacing: normal;
+    overflow-wrap: break-word;
+
+    @include tablet {
+        max-width: 74rem;
+    }
+
+    > * {
+        min-width: 0;
+        margin: 0;
+    }
+
+    > * + * {
+        margin-top: 2.4rem;
+    }
+
+    > :first-child {
+        margin-top: 0;
+    }
+
+    h2,
+    h3 {
+        @include default-tr;
+
+        scroll-margin-top: calc(var(--header-height) + 2.4rem);
+
+        margin-top: 4.8rem;
+        border-radius: 0.8rem;
+
+        font-family: inherit;
+        text-wrap: wrap;
+
+        transition-property: background-color, box-shadow;
+    }
+
+    h2 {
+        @include font-size(article-h2);
+    }
+
+    h3 {
+        @include font-size(article-h3);
+
+        margin-top: 3.2rem;
+    }
+
+    h2:target,
+    h3:target {
+        @media (prefers-reduced-motion: no-preference) {
+            animation: post-heading-target-highlight 1.6s ease-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            background-color: color-mix(in srgb, var(--text-color) 12%, transparent);
+        }
+    }
+
+    h2 + *,
+    h3 + * {
+        margin-top: 1.2rem;
+    }
+
+    p,
+    li {
+        font: inherit;
+        color: var(--text-color);
+    }
+
+    strong {
+        @include font-size(emphasis);
+    }
+
+    a {
+        color: inherit;
+        text-decoration-thickness: 0.12em;
+        text-underline-offset: 0.18em;
+    }
+
+    ol,
+    ul {
+        padding-inline-start: 1.5em;
+        list-style-position: outside;
+    }
+
+    ul {
+        list-style-type: disc;
+    }
+
+    ol {
+        list-style-type: decimal;
+    }
+
+    li {
+        padding-inline-start: 0.25em;
+    }
+
+    li + li {
+        margin-top: 0.4em;
+    }
+
+    li > p + p,
+    li > ul,
+    li > ol {
+        margin-top: 0.5em;
+    }
+
+    ul ul {
+        list-style-type: circle;
+    }
+
+    ul ul ul {
+        list-style-type: square;
+    }
+
+    li::marker {
+        color: var(--text-color);
+    }
+
+    blockquote {
+        padding: 1.6rem 2rem;
+        border-left: 3px solid var(--text-color);
+        border-radius: 0;
+
+        text-wrap: wrap;
+
+        background: var(--hover-background-color);
+
+        @include mobile {
+            padding: 1.6rem;
+        }
+    }
+
+    pre {
+        @include font-size(article-code-block);
+
+        overflow-x: auto;
+
+        width: 100%;
+        padding: 2.4rem;
+        border: 1px solid var(--divider-color);
+        border-radius: 0.8rem;
+
+        color: var(--text-contrast-color);
+        overflow-wrap: normal;
+        tab-size: 4;
+
+        background: var(--background-contrast-color);
+
+        @include mobile {
+            padding: 1.6rem;
+        }
+    }
+
+    pre:focus-visible {
+        outline: 2px solid var(--focus-outline-color);
+        outline-offset: 2px;
+    }
+
+    code {
+        @include font-size(code-family);
+    }
+
+    :not(pre) > code {
+        @include font-size(article-code-inline);
+
+        padding: 0.08em 0.15em;
+        border-radius: 0.3em;
+
+        color: inherit;
+        overflow-wrap: anywhere;
+
+        background: var(--hover-background-color);
+    }
+
+    table {
+        overflow-x: auto;
+        display: table;
+        border-collapse: collapse;
+
+        width: 100%;
+
+        overflow-wrap: normal;
+
+        background-color: transparent;
+
+        @include tablet {
+            display: block;
+        }
+    }
+
+    table thead {
+        border-bottom: 1px solid var(--divider-color);
+    }
+
+    table th,
+    table td {
+        padding: 1.2rem 1.6rem;
+        color: var(--text-color);
+        text-align: start;
+
+        @include mobile {
+            padding: 1rem 1.2rem;
+        }
+    }
+
+    table tbody tr {
+        @include default-tr;
+
+        border-bottom: 1px solid var(--divider-color);
+        transition-property: background-color;
+    }
+
+    table tbody tr:hover {
+        background-color: var(--hover-background-color);
+    }
+
+    table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        border-radius: 2rem;
+    }
+}

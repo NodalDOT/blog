@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
 const withNextIntl = createNextIntlPlugin("./src/shared/i18n/request.ts");
 const withMDX = createMDX({
     options: {
-        remarkPlugins: ["remark-gfm", path.resolve("src/entities/post/lib/remarkPostToc.js")],
+        remarkPlugins: ["remark-gfm", path.resolve("plugins/remarkPostToc.mts")],
     },
 });
 

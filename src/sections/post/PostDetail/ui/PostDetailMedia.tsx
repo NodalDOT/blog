@@ -1,67 +1,16 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import Button from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import Modal, { useModal } from "@/shared/ui/Modal";
-import styles from "./PostDetail.module.scss";
+import type { Post } from "@/entities/post";
+import { PostVideo } from "./PostVideo";
+import styles from "./PostDetailMedia.module.scss";
 
-interface PostDetailMediaProps {
-    postId: string;
-    date: string;
-    imageSrc: string;
-    imageAlt: string;
-    videoUrl: string;
-}
-
-const ProjectVideo = ({ src, active }: { src: string; active: boolean }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        if (!active) return;
-
-        video.currentTime = 0;
-        void video.play().catch(() => undefined);
-
-        return () => {
-            video.pause();
-        };
-    }, [src, active]);
-
-    return (
-        <video
-            ref={videoRef}
-            className={styles["post-detail__video"]}
-            src={src}
-            tabIndex={0}
-            preload="none"
-            controls
-            playsInline
-        />
-    );
-};
-
-export const PostDetailMedia = ({
-    postId,
-    date,
-    imageSrc,
-    imageAlt,
-    videoUrl,
-}: PostDetailMediaProps) => {
-    const { open, openModal, closeModal } = useModal();
-    const t = useTranslations("PostDetail");
-    const year = date.slice(0, 4);
+export const PostDetailMedia = ({ post }: { post: Post }) => {
+    const { id, date, image, videoUrl } = post;
 
     return (
         <div className={styles["post-detail__hero-media-wrapper"]}>
             <div className={styles["post-detail__hero-media-meta"]} aria-hidden="true">
                 <span className={styles["post-detail__hero-media-meta-value"]}>
-                    {postId.padStart(2, "0")}
+                    {id.padStart(2, "0")}
                 </span>
                 <span className={styles["post-detail__hero-media-meta-line"]} />
                 <span className={styles["post-detail__hero-media-meta-label"]}>POST</span>
@@ -70,33 +19,16 @@ export const PostDetailMedia = ({
             <div className={styles["post-detail__hero-media-frame"]}>
                 <Image
                     className={styles["post-detail__hero-media"]}
-                    src={imageSrc}
-                    alt={imageAlt}
+                    src={image.src}
+                    alt={image.alt}
                     width={1600}
                     height={800}
-                    priority
-                    sizes="(max-width: 786px) 100vw, (max-width: 1200px) 60vw, 800px"
+                    preload
+                    fetchPriority="high"
+                    sizes="(max-width: 785px) 90vw, (max-width: 1599px) calc(90vw - 21rem), 123rem"
                 />
 
-                {videoUrl && (
-                    <>
-                        <Button
-                            type="button"
-                            ariaLabel={t("playVideo")}
-                            className={styles["post-detail__play-button"]}
-                            onClick={openModal}
-                        />
-
-                        <Button
-                            type="button"
-                            ariaLabel={t("playVideo")}
-                            className={styles["post-detail__play-button-center"]}
-                            onClick={openModal}
-                        >
-                            <Icon name="play" />
-                        </Button>
-                    </>
-                )}
+                {videoUrl && <PostVideo src={videoUrl} />}
             </div>
 
             <div
@@ -104,25 +36,12 @@ export const PostDetailMedia = ({
                 data-side="end"
                 aria-hidden="true"
             >
-                <span className={styles["post-detail__hero-media-meta-value"]}>{year}</span>
+                <span className={styles["post-detail__hero-media-meta-value"]}>
+                    {date.slice(0, 4)}
+                </span>
                 <span className={styles["post-detail__hero-media-meta-line"]} />
                 <span className={styles["post-detail__hero-media-meta-label"]}>16:9</span>
             </div>
-
-            {videoUrl && (
-                <>
-                    <Modal
-                        open={open}
-                        onClose={closeModal}
-                        title={t("videoDialogTitle")}
-                        contentClassName={styles["post-detail__video-modal"]}
-                    >
-                        <div className={styles["post-detail__video-frame"]}>
-                            <ProjectVideo src={videoUrl} active={open} />
-                        </div>
-                    </Modal>
-                </>
-            )}
         </div>
     );
 };

@@ -16,7 +16,10 @@ export const PostBackLink = ({ label }: PostBackLinkProps) => {
         <Link
             href="/posts"
             className={styles["post-detail__back-link"]}
-            onClick={() => startTransition("/posts")}
+            onNavigate={(event) => {
+                event.preventDefault();
+                startTransition("/posts");
+            }}
         >
             <Icon name="arrow-left" className={styles["post-detail__back-icon"]} />
             {label}
