@@ -1,5 +1,4 @@
 import type { Post } from "@/entities/post";
-import type { TocItem } from "../model/types";
 
 import styles from "./PostDetail.module.scss";
 import contentStyles from "./PostContent.module.scss";
@@ -16,7 +15,6 @@ interface PostDetailProps {
     tocLabel: string;
     publishedLabel: string;
     publishedDate: string;
-    toc?: TocItem[];
 }
 
 export const PostDetail: React.FC<PostDetailProps> = ({
@@ -26,7 +24,6 @@ export const PostDetail: React.FC<PostDetailProps> = ({
     tocLabel,
     publishedLabel,
     publishedDate,
-    toc = [],
 }) => {
     return (
         <article className={classNames(styles["post-detail"], "section")}>
@@ -52,8 +49,8 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                 <PostDetailMedia post={post} />
             </header>
 
-            <div className={styles["post-detail__content-layout"]} data-has-toc={toc.length > 0}>
-                {toc.length > 0 && <PostToc toc={toc} label={tocLabel} />}
+            <div className={styles["post-detail__content-layout"]}>
+                <PostToc label={tocLabel} />
 
                 <div className={contentStyles["post-content"]} data-post-content>
                     {content}

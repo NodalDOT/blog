@@ -178,7 +178,7 @@
             padding: 0;
         }
 
-        &[data-has-toc="false"] {
+        &:has([data-empty="true"]) {
             grid-template-areas: "content";
             grid-template-columns: minmax(0, 1fr);
         }

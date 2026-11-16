@@ -24,6 +24,8 @@
 
     background: none;
 
+    scroll-target-group: auto;
+
     @include tablet {
         position: static;
 
@@ -32,6 +34,10 @@
 
         width: 100%;
         max-height: none;
+    }
+
+    &[hidden] {
+        display: none;
     }
 
     &__layout {

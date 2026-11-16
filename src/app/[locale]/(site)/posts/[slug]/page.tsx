@@ -44,7 +44,7 @@ export default async function PostPage({ params }: PostPageProps) {
     const article = await getPost(locale, slug);
     if (!article) return notFound();
 
-    const { Content, post, toc } = article;
+    const { Content, post } = article;
 
     const baseSeo = assertDefined(BASE_SEO[locale], `SEO config for locale ${locale} is required`);
     const postUrl = `${baseSeo.url}/${locale}/posts/${slug}`;
@@ -106,6 +106,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <PostDetail
+                key={`${locale}/${slug}`}
                 post={post}
                 content={<Content />}
                 backLabel={t("backToPosts")}
@@ -117,7 +118,6 @@ export default async function PostPage({ params }: PostPageProps) {
                     year: "numeric",
                     timeZone: "UTC",
                 }).format(new Date(post.date))}
-                toc={toc}
             />
         </>
     );

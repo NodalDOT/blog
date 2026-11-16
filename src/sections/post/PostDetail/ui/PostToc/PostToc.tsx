@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { collectHeadings } from "../../model/collectHeadings";
 import type { TocItem } from "../../model/types";
 import styles from "./PostToc.module.scss";
 
 interface PostTocProps {
-    toc: TocItem[];
     label: string;
 }
 
-export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
+export const PostToc: React.FC<PostTocProps> = ({ label }) => {
     const titleId = useId();
+    const [toc, setToc] = useState<TocItem[] | null>(null);
+    const initialize = useCallback((nav: HTMLElement | null) => {
+        const content = nav?.closest("article")?.querySelector<HTMLElement>("[data-post-content]");
+        if (content) setToc(collectHeadings(content));
+    }, []);
     const layoutRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<SVGPathElement>(null);
     const markerRef = useRef<SVGPathElement>(null);
 
     useEffect(() => {
+        if (!toc?.length) return;
         const layout = layoutRef.current;
         const content = layout
             ?.closest("article")
@@ -31,16 +37,22 @@ export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
         let maxScroll = 0;
         let activeLink: HTMLAnchorElement | undefined;
         let segments: { x: number; top: number; bottom: number }[] = [];
+        const nativeScrollspy = CSS.supports("scroll-target-group: auto");
 
         const updateActive = () => {
             frameId = 0;
+            const nativeActive = nativeScrollspy
+                ? entries.findIndex(({ link }) => link.matches(":target-current"))
+                : -1;
             const active =
-                maxScroll > 0 && window.scrollY >= maxScroll - 1
-                    ? entries.length - 1
-                    : Math.max(
-                          0,
-                          entries.findLastIndex(({ headingTop }) => window.scrollY >= headingTop)
-                      );
+                nativeActive >= 0
+                    ? nativeActive
+                    : maxScroll > 0 && window.scrollY >= maxScroll - 1
+                      ? entries.length - 1
+                      : Math.max(
+                            0,
+                            entries.findLastIndex(({ headingTop }) => window.scrollY >= headingTop)
+                        );
             const link = entries[active]?.link;
             if (link === activeLink) return;
 
@@ -89,6 +101,18 @@ export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
             activeLink = undefined;
             requestUpdate();
         };
+        // The browser's initial fragment navigation runs before generated IDs exist.
+        let hashTarget: HTMLElement | null = null;
+        try {
+            hashTarget = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+        } catch {
+            // A malformed fragment must not prevent the TOC from initializing.
+        }
+        const hashFrame = requestAnimationFrame(() => {
+            if (hashTarget && content.contains(hashTarget)) {
+                hashTarget.scrollIntoView({ behavior: "instant", block: "start" });
+            }
+        });
         const observer = new ResizeObserver(updateLayout);
         observer.observe(layout);
         observer.observe(content);
@@ -99,13 +123,21 @@ export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
         return () => {
             observer.disconnect();
             cancelAnimationFrame(frameId);
+            cancelAnimationFrame(hashFrame);
             window.removeEventListener("scroll", requestUpdate);
             window.removeEventListener("resize", updateLayout);
         };
     }, [toc]);
 
     return (
-        <nav id="toc" className={styles["post-toc"]} aria-labelledby={titleId}>
+        <nav
+            ref={initialize}
+            id="toc"
+            className={styles["post-toc"]}
+            aria-labelledby={titleId}
+            hidden={!toc?.length}
+            data-empty={toc !== null && toc.length === 0}
+        >
             <h2 id={titleId} className={styles["post-toc__title"]}>
                 {label}
             </h2>
@@ -115,7 +147,7 @@ export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
                     <path ref={markerRef} className={styles["post-toc__ribbon-fill"]} />
                 </svg>
                 <ul className={styles["post-toc__list"]}>
-                    {toc.map((item) => (
+                    {toc?.map((item) => (
                         <PostTocItem key={item.id} item={item} />
                     ))}
                 </ul>
@@ -126,7 +158,7 @@ export const PostToc: React.FC<PostTocProps> = ({ toc, label }) => {
 
 const PostTocItem: React.FC<{ item: TocItem }> = ({ item }) => (
     <li className={styles["post-toc__item"]}>
-        <a className={styles["post-toc__link"]} href={`#${item.id}`}>
+        <a className={styles["post-toc__link"]} href={`#${encodeURIComponent(item.id)}`}>
             {item.title}
         </a>
         {item.children.length > 0 && (

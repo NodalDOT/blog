@@ -11,7 +11,6 @@ beforeEach(() => {
     jest.mocked(getPostSlugs).mockReturnValue(["9", "1"]);
     jest.mocked(getPost).mockImplementation(async (_locale, slug) => ({
         Content: () => null,
-        toc: [],
         post: {
             id: slug,
             title: "Post",

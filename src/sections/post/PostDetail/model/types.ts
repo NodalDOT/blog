@@ -1,1 +1,5 @@
-export type { PostTocItem as TocItem } from "@/entities/post";
+export interface TocItem {
+    id: string;
+    title: string;
+    children: TocItem[];
+}

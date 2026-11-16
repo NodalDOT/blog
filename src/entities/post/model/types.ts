@@ -10,9 +10,3 @@ export interface Post {
 }
 
 export type PostMetadata = Omit<Post, "id">;
-
-export interface PostTocItem {
-    id: string;
-    title: string;
-    children: PostTocItem[];
-}
