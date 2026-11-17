@@ -3,7 +3,7 @@
 .workspace {
     --desk-color: #4e342e;
     --monitor-frame: #333;
-    --screen-bg: #282a36;
+    --screen-bg: var(--code-background);
     --light-gradient: linear-gradient(to bottom, rgb(255 253 200 / 40%) 0%, transparent 100%);
     --eye-white: #f5f5f5;
     --pupil-color: #111;
@@ -17,12 +17,6 @@
     --screen-bar-bg: #111;
     --screen-bar-hover-bg: #222;
     --screen-bar-shadow: 0 0.4rem 1rem rgb(0 0 0 / 60%);
-    --code-text: #f8f8f2;
-    --code-comment: #6272a4;
-    --code-keyword: #ff79c6;
-    --code-string: #f1fa8c;
-    --code-function: #50fa7b;
-    --code-number: #bd93f9;
     --stand-neck-gradient: linear-gradient(to right, #222, #333, #222);
     --stand-base-color: #1a1a1a;
     --desk-border: #3e2723;

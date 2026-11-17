@@ -1,0 +1,53 @@
+.highlighted-code {
+    :global(.token.comment),
+    :global(.token.prolog),
+    :global(.token.doctype),
+    :global(.token.cdata) {
+        color: var(--code-comment);
+    }
+
+    :global(.token.keyword),
+    :global(.token.tag) {
+        color: var(--code-keyword);
+    }
+
+    :global(.token.string),
+    :global(.token.attr-value) {
+        color: var(--code-string);
+    }
+
+    :global(.token.variable),
+    :global(.token.dom) {
+        color: var(--code-variable);
+    }
+
+    :global(.token.property),
+    :global(.token.property-access),
+    :global(.token.attr-name) {
+        color: var(--code-property);
+    }
+
+    :global(.token.function) {
+        color: var(--code-function);
+    }
+
+    :global(.token.builtin),
+    :global(.token.class-name),
+    :global(.token.maybe-class-name),
+    :global(.token.constant) {
+        color: var(--code-type);
+    }
+
+    :global(.token.operator) {
+        color: var(--code-operator);
+    }
+
+    :global(.token.punctuation) {
+        color: var(--code-punctuation);
+    }
+
+    :global(.token.number),
+    :global(.token.boolean) {
+        color: var(--code-number);
+    }
+}
