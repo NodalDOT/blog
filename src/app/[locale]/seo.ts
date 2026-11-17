@@ -3,13 +3,13 @@ export const BASE_SEO = {
         siteName: "NodalDOT blog",
         locale: "en_US",
         url: "https://nodaldot.space",
-        defaultImage: "/posts/images/1.jpg",
+        defaultImage: "/posts/images/1.webp",
     },
     ru: {
         siteName: "NodalDOT блог",
         locale: "ru_RU",
         url: "https://nodaldot.space",
-        defaultImage: "/posts/images/1.jpg",
+        defaultImage: "/posts/images/1.webp",
     },
 } as const;
 

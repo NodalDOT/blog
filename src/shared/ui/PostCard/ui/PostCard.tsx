@@ -14,7 +14,7 @@ export interface PostCardProps {
     id: string;
     title: string;
     subtitle: string;
-    image: { src: string; alt: string };
+    image: { src: string; alt: string; thumbnailSrc?: string };
     videoUrl: string;
 
     style?: React.CSSProperties;
@@ -30,7 +30,8 @@ const PostCard: FC<PostCardProps> = ({
     ...otherProps
 }) => {
     const { startTransition } = usePageTransitionActions();
-    const hasImage = image.src.trim().length > 0;
+    const imageSrc = image.thumbnailSrc?.trim() || image.src;
+    const hasImage = imageSrc.trim().length > 0;
     const hasVideo = videoUrl.trim().length > 0;
 
     return (
@@ -53,7 +54,7 @@ const PostCard: FC<PostCardProps> = ({
             <div className={styles["post-card__media"]}>
                 {hasImage && (
                     <Image
-                        src={image.src}
+                        src={imageSrc}
                         alt={image.alt}
                         width={1200}
                         height={675}
