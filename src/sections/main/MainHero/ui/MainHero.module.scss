@@ -75,3 +75,21 @@
         white-space: normal;
     }
 }
+
+.main-hero__greeting {
+    @include font-size(control);
+}
+
+.main-hero__title {
+    @include font-size(h1);
+
+    text-wrap: balance;
+}
+
+.main-hero__headline {
+    gap: 2rem;
+
+    @include tablet {
+        gap: 1.6rem;
+    }
+}

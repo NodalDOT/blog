@@ -33,7 +33,6 @@ const Eye: FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pupilRef = useRef<HTMLDivElement>(null);
     const scleraRef = useRef<HTMLDivElement>(null);
-    const blocksRefs = useRef<HTMLDivElement[]>([]);
 
     useGSAP(
         () => {
@@ -43,7 +42,6 @@ const Eye: FC = () => {
                 const container = containerRef.current;
                 const pupil = pupilRef.current;
                 const sclera = scleraRef.current;
-                const blocks = blocksRefs.current;
 
                 if (!container || !pupil || !sclera) return;
 
@@ -150,20 +148,6 @@ const Eye: FC = () => {
                     });
                 };
 
-                const blockTweens = blocks.map((block, i) =>
-                    gsap.to(block, {
-                        y: gsap.utils.random(10, 25),
-                        repeat: -1,
-                        yoyo: true,
-                        duration: gsap.utils.random(4, 7),
-                        ease: "sine.inOut",
-                        repeatDelay: gsap.utils.random(0.2, 0.8),
-                        delay: i * 0.3,
-                        force3D: true,
-                        paused: true,
-                    })
-                );
-
                 let releaseTimer: ReturnType<typeof setTimeout> | undefined;
                 let intentTimer: ReturnType<typeof setTimeout> | undefined;
                 let isVisible = false;
@@ -227,7 +211,7 @@ const Eye: FC = () => {
                 document.addEventListener("focusin", handleFocusIn);
                 document.addEventListener("focusout", release);
 
-                const loops = [breathing, ...blockTweens];
+                const loops = [breathing];
 
                 const trigger = ScrollTrigger.create({
                     trigger: container,
@@ -241,7 +225,6 @@ const Eye: FC = () => {
                         stopIdle();
 
                         if (isActive) {
-                            blockTweens.forEach((anim) => anim.play());
                             breathing.play();
                             scheduleBlink();
                             if (!target) idleStep();
@@ -273,20 +256,9 @@ const Eye: FC = () => {
     );
 
     const eyelashTypes = ["type-1", "type-2", "type-3"];
-    const blockPositions = ["top-left", "top-right", "bottom-left", "bottom-right"];
 
     return (
         <div className={style["eye"]} ref={containerRef}>
-            {blockPositions.map((pos, index) => (
-                <div
-                    key={pos}
-                    ref={(el) => {
-                        if (el) blocksRefs.current[index] = el;
-                    }}
-                    className={`${style["eye__block"]} ${style[`eye__block--${pos}`]}`}
-                />
-            ))}
-
             <div className={style["eye__wrapper"]}>
                 <div className={style["eye__lashes"]}>
                     {eyelashTypes.map((type) => (

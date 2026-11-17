@@ -1,25 +1,24 @@
 @use "@/shared/styles/utils/index" as *;
 
 .eye {
-    @include box(50rem);
-
     position: relative;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    max-width: 100%;
+    aspect-ratio: 1;
+    width: min(100%, 50rem);
     border-radius: 1.2rem;
 
     background-color: var(--background-contrast-color);
 
     @include tablet {
-        @include box(45rem);
+        width: min(100%, 45rem);
     }
 
     @include mobile {
-        @include box(40rem);
+        width: min(100%, 40rem);
     }
 
     &__wrapper {
@@ -124,93 +123,6 @@
 
         @include tablet {
             @include box(10rem);
-        }
-    }
-
-    &__block {
-        @include box(10rem);
-
-        pointer-events: none;
-        will-change: transform;
-
-        position: absolute;
-
-        border-radius: 1.2rem;
-
-        opacity: 0.9;
-
-        @include tablet {
-            @include box(8rem);
-        }
-
-        @include mobile {
-            display: none;
-        }
-    }
-
-    &__block--top-left,
-    &__block--top-right {
-        top: -6rem;
-
-        @include tablet {
-            top: 0;
-        }
-    }
-
-    &__block--bottom-left,
-    &__block--bottom-right {
-        bottom: -6rem;
-
-        @include tablet {
-            bottom: 0;
-        }
-    }
-
-    &__block--top-left,
-    &__block--bottom-left {
-        left: max(-11rem, -5vw);
-
-        @media (1024px <= width < 1280px) {
-            left: max(-4rem, -5vw);
-        }
-
-        @include tablet {
-            left: max(-10rem, -5vw);
-        }
-    }
-
-    &__block--top-right,
-    &__block--bottom-right {
-        right: max(-11rem, -5vw);
-
-        @media (1024px <= width < 1280px) {
-            right: max(-4rem, -5vw);
-        }
-
-        @include tablet {
-            right: max(-10rem, -5vw);
-        }
-    }
-
-    &__block--top-left {
-        background: linear-gradient(to bottom, #ff7eb3, #c77dff);
-    }
-
-    &__block--top-right {
-        background: linear-gradient(to left, #6dd5fa, #2980b9);
-    }
-
-    &__block--bottom-left {
-        background: linear-gradient(to top, #fbc2eb, #a6c1ee);
-    }
-
-    &__block--bottom-right {
-        background: linear-gradient(to right, #84fab0, #8fd3f4);
-    }
-
-    [data-theme="dark"] & {
-        .eye__block {
-            filter: grayscale(1);
         }
     }
 }

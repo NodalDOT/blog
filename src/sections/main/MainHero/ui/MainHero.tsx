@@ -16,8 +16,8 @@ export const MainHero: FC = () => {
         <section className={classNames(styles["main-hero"], "section")}>
             <div className={styles["main-hero__content"]}>
                 <div className={styles["main-hero__headline"]}>
-                    <h1>{t("greeting")}</h1>
-                    <h2>{t("profession")}</h2>
+                    <p className={styles["main-hero__greeting"]}>{t("greeting")}</p>
+                    <h1 className={styles["main-hero__title"]}>{t("profession")}</h1>
                 </div>
                 <p>{t("description")}</p>
                 <ScrollButton target="#main-posts">
