@@ -27,12 +27,9 @@ export const PostVideo = ({ src }: { src: string }) => {
                 type="button"
                 ariaLabel={t("playVideo")}
                 className={styles["post-detail__play-button"]}
+                leftIcon={<Icon name="play" />}
                 onClick={openModal}
-            >
-                <span className={styles["post-detail__play-button-center"]} aria-hidden="true">
-                    <Icon name="play" />
-                </span>
-            </Button>
+            />
             <Modal
                 open={open}
                 onClose={closeModal}

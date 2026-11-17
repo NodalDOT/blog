@@ -93,66 +93,17 @@
         }
     }
 
-    &__play-button {
+    &__hero-media-frame &__play-button {
+        --btn-padding: 0;
+        --btn-radius: 50%;
+
+        @include box(6.4rem);
+
         position: absolute;
         z-index: 1;
-        inset: 0;
-
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        border: none;
-        border-radius: 0;
-
-        color: transparent;
-
-        background: transparent;
-
-        &::before {
-            display: none;
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--text-color);
-            outline-offset: -0.4rem;
-            box-shadow: none;
-        }
-
-        > span {
-            position: static;
-        }
-
-        &:hover .post-detail__play-button-center,
-        &:focus-visible .post-detail__play-button-center {
-            color: var(--btn-hover-color);
-        }
-
-        &:hover .post-detail__play-button-center::before,
-        &:focus-visible .post-detail__play-button-center::before {
-            width: 200%;
-            height: 200%;
-        }
-    }
-
-    &__play-button-center {
-        @include default-tr(color);
-
-        position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-
-        overflow: hidden;
-        display: grid;
-        place-items: center;
-
-        width: 6.4rem;
-        height: 6.4rem;
-        border-radius: 50%;
-
-        color: var(--btn-color);
-
-        background: var(--btn-bg);
 
         @include tablet {
             @include box(5.6rem);
@@ -162,29 +113,8 @@
             @include box(5.2rem);
         }
 
-        &::before {
-            @include default-tr((width, height));
-
-            content: "";
-
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-
-            background: var(--btn-before-bg);
-        }
-
-        svg {
+        > span {
             @include box(4.8rem);
-
-            position: relative;
-            fill: currentcolor;
-            stroke: none;
         }
     }
 
@@ -212,7 +142,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .post-detail__play-button-center::before {
+    .post-detail__play-button::before {
         transition: none;
     }
 }

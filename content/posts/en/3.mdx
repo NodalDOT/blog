@@ -1,0 +1,413 @@
+export const metadata = {
+    title: "Stop adding console.log everywhere: see values right in your code",
+    subtitle:
+        "How code-trace works: highlighting evaluated expressions and showing their values alongside your code.",
+    date: "2026-11-11",
+    videoUrl: "/posts/videos/3.mp4",
+    image: {
+        src: "/posts/images/3-shipping.webp",
+        thumbnailSrc: "/posts/images/3-shipping-card.webp",
+        alt: "code-trace showing live expression values in a shipping cost example",
+    },
+};
+
+I wanted to see which expressions were evaluated and what values they produced, right in the code. Without adding `console.log` everywhere, only to remove all those calls later.
+
+That's how code-trace started. Run a function, and values appear alongside the code. Change the arguments and run it again: you get new values and highlights showing which parts of the code were reached.
+
+Let's see how it works. We'll start with a three-line function.
+
+## Just wrap the value
+
+Suppose we have this age check:
+
+```js
+function check(age) {
+    if (age >= 18) return "You're in";
+    return "Not old enough yet";
+}
+```
+
+Let's wrap `age >= 18` in `trace`: it logs the value and returns it unchanged. The check still works as before.
+
+```js
+function trace(label, value) {
+    console.log(label, value);
+    return value;
+}
+
+function check(age) {
+    if (trace("age >= 18", age >= 18)) return "You're in";
+    return "Not old enough yet";
+}
+
+check(16);
+// age >= 18 false
+```
+
+The trick is `return value`. If we just returned `true`, we'd stop observing the program and start helping underage guests get in. 🙂
+
+Now let's add another condition:
+
+```js
+function check(age, hasInvite) {
+    if (trace("age >= 18", age >= 18)) {
+        if (trace("hasInvite", hasInvite)) {
+            return trace("result", "You're in");
+        }
+        return trace("result", "Invitation required");
+    }
+    return trace("result", "Not old enough yet");
+}
+
+check(20, false);
+// age >= 18 true
+// hasInvite false
+// result Invitation required
+```
+
+It works. But half the function is now debugging code. Add more nested conditions, and we'll need more wrappers. Then we'll have to remove them all.
+
+I'd rather leave the source alone and add these calls automatically. First, though, we need to **find the expressions in the code** that we want to wrap.
+
+## Could we just find the parentheses after if?
+
+For `if (age >= 18)`, that sounds reasonable. Find `if`, take the text between the parentheses, and insert `trace`.
+
+Then we come across this:
+
+```js
+if (users.some((user) => user.roles.includes("admin"))) {
+    openPanel();
+}
+```
+
+Now we have several pairs of parentheses. Add strings, comments, and template literals, and our text search gradually turns into a JavaScript parser of its own. All we wanted was to see what a function returned.
+
+And `if` isn't the only place we're interested in. We also want to observe expressions after `return`, on the right-hand side of variable declarations, in loop conditions, and in ternary expressions.
+
+It's important to distinguish `return` from the expression after it. In `return result`, we wrap only `result`, giving us `return trace("result", result)`. The `return` statement stays in place and returns the value it receives.
+
+For a closer look at the difference between statements and expressions, Josh W. Comeau has a [clear explanation with examples](https://www.joshwcomeau.com/javascript/statements-vs-expressions/).
+
+## Reading code as a tree
+
+Instead of searching through text, we can use a parser to read the code. It builds an **AST: an abstract syntax tree**. The AST consists of nested objects describing parts of the code: conditions, function calls, and strings. An `if` statement and the string `"if"` are now different kinds of nodes, so we won't mistake one for the other.
+
+If you're new to ASTs, Bohdan Liashenko has a [detailed introduction with JavaScript examples](https://itnext.io/ast-for-javascript-developers-3e79aeb08343). He explains how text becomes a tree and how Babel, refactoring tools, and Prettier use it.
+
+Let's take a small example:
+
+```js
+if (age >= 18) allow();
+```
+
+Here's a **simplified AST diagram for this example**, using the format our parser returns. We'll show only the fields and nodes we need:
+
+```text
+Program
+└─ body[0]: IfStatement
+   ├─ test: BinaryExpression (operator: >=)
+   │  ├─ left: Identifier (name: age)
+   │  └─ right: Literal (value: 18)
+   └─ consequent: ExpressionStatement
+      └─ expression: CallExpression
+         ├─ callee: Identifier (name: allow)
+         └─ arguments: []
+```
+
+No more guessing which parentheses belong together. In this tree, `IfStatement.test` is the expression `age >= 18`, and `consequent` is the statement that runs if the condition is truthy.
+
+For `return result`, the parser creates a `ReturnStatement` node with the expression `result` in its `argument` field. For a bare `return;`, that field is `null`.
+
+Our parser also gives nodes `start` and `end` offsets in the source. For example, the condition here has `start: 4` and `end: 13`, so `source.slice(4, 13)` returns `age >= 18`. Field names and position formats vary between parsers. From here on, we'll use Oxc's format.
+
+Tools for **code analysis and transformation** use these trees. A **linter** can look for suspicious code, a **formatter** can print it according to its formatting rules, and we can **find places to observe values**.
+
+## Which parser should we use?
+
+We need a parser that can read our code and tell us where each expression starts and ends.
+
+Here are a few familiar options:
+
+| Option                                                                                         | When it's useful                                  | What to keep in mind                                                                       |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [Babel parser](https://babeljs.io/docs/babel-parser)                                           | You're already using Babel                        | Its default AST differs from ESTree. The `estree` plugin provides compatibility            |
+| [Acorn](https://github.com/acornjs/acorn)                                                      | You need to parse standard JavaScript             | JSX and TypeScript require additional plugins                                              |
+| [TypeScript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) | You need type information as well as syntax nodes | It has its own AST format; type information is accessed separately through the TypeChecker |
+| [Oxc](https://oxc.rs/docs/guide/usage/parser.html)                                             | You need to parse JavaScript, TypeScript, and JSX | Parsing TypeScript does not, by itself, mean checking its types                            |
+
+ESTree is a widely used specification for JavaScript ASTs. That doesn't mean every parser returns the same tree. Even similar nodes can have different fields. I wouldn't move traversal code between libraries without checking those differences first.
+
+I used what was already available through Vite. I don't feel like writing my own parser just to show a few values next to some code. There are other ways to ruin a weekend. 😞
+
+## Finding places for the wrappers
+
+First, let's mark the expressions whose values we want to see. We'll call each of these locations an **observation point**, or a `probe` in the code. For now, all we need is its range in the source:
+
+```ts
+type Probe = { start: number; end: number };
+```
+
+We don't have any values or hit counts yet. We've only parsed the code; it hasn't run.
+
+Here's a shorter version of the code that collects these probes, using the same imports as the project:
+
+```ts
+import { parseSync, Visitor } from "vite";
+
+const source = "if (age >= 18) allow();";
+const { program, errors } = parseSync("example.js", source, {
+    preserveParens: false,
+});
+
+if (errors.length) throw new Error("Could not parse the code");
+
+const probes: { start: number; end: number }[] = [];
+
+new Visitor({
+    IfStatement(node) {
+        probes.push({ start: node.test.start, end: node.test.end });
+    },
+    ReturnStatement(node) {
+        if (node.argument) {
+            probes.push({ start: node.argument.start, end: node.argument.end });
+        }
+    },
+}).visit(program);
+
+console.log(probes);
+// [{ start: 4, end: 13 }]
+console.log(source.slice(probes[0].start, probes[0].end));
+// age >= 18
+```
+
+`Visitor` walks the tree, including nested constructs. We specify what to do when it encounters a node type we're interested in. It finds a nested `if` just as it finds the outer one.
+
+A bare `return;` has no argument, which is why we check for one. There's nothing to wrap there.
+
+The full implementation collects more probes: conditions in `while`, `do...while`, and `for` loops; the expression being matched in a `switch`; the argument of `throw`; the condition in a ternary expression; the right-hand side of a variable declaration; and the expression bodies of arrow functions. It also handles standalone expressions such as `save();`.
+
+Directives such as `"use strict"` are skipped. We also skip function and class expressions on the right-hand side of variable declarations. We can't wrap everything indiscriminately: in some cases, doing so would change how the code behaves.
+
+## Adding wrappers to the source
+
+For a single condition, the transformation looks like this:
+
+```js
+// Before
+if (age >= 18) allow();
+
+// After: showing only the wrapper around the condition
+if (__trace$(0, age >= 18)) allow();
+```
+
+`0` is the probe ID: its index in the array.
+
+Why do we need extra parentheses around the expression? Suppose the code contains `return (save(), 42)`: it calls `save()` first, then returns `42`. Here, the comma operator evaluates the expressions from left to right and produces the value of the last one.
+
+We need to keep those parentheses when adding the wrapper:
+
+```js
+// Without parentheses: three arguments instead of two
+return __trace$(0, save(), 42);
+
+// With parentheses: the second argument is the value of the whole expression, 42
+return __trace$(0, (save(), 42));
+```
+
+In the first case, the wrapper receives the return value of `save()` as its value argument, rather than `42`. That's why we always add parentheses around the expression we're wrapping.
+
+But inserting text near the beginning of the source shifts every offset after it. So the project collects all the insertions first, then builds the result in a single pass from pieces of the **original** source string. We don't modify that string during the pass.
+
+Each probe needs two insertions:
+
+```ts
+{ at: start, text: `__trace$(${id}, (` }
+{ at: end, text: "))" }
+```
+
+Nesting needs some care, too. For example, the right-hand side of a variable declaration and the condition in a ternary expression can start at the same offset:
+
+```js
+const label = age >= 18 ? "Allowed" : "Not allowed";
+```
+
+Here, we want to see both the condition's result and the selected string:
+
+```js
+const label = __trace$(0, __trace$(1, age >= 18) ? "Allowed" : "Not allowed");
+```
+
+When two opening insertions share the same offset, the outer one must come first: **the one wrapping the longer expression**. At the boundary between adjacent expressions, we close the previous wrapper before opening the next one. The sorting logic in `wrap-probe.ts` handles these cases.
+
+We could modify the tree itself and print the entire file again. I stuck to text insertions: they're enough for this task, and they preserve the original formatting.
+
+## Where the values come from
+
+The parser sees `age >= 18`, but it doesn't know what value `age` will have or what the comparison will produce. **To find out, we need to run the code.** That's why we add wrappers: when execution reaches an expression, the wrapper receives its result, saves it for display, and returns it unchanged.
+
+Here's a simplified runtime:
+
+```ts
+const values = new Map<number, unknown>();
+const hits = new Map<number, number>();
+
+function __trace$<T>(id: number, value: T): T {
+    values.set(id, value);
+    hits.set(id, (hits.get(id) ?? 0) + 1);
+    return value;
+}
+
+__trace$(0, 20 >= 18);
+__trace$(0, 16 >= 18);
+
+console.log(values.get(0)); // false
+console.log(hits.get(0)); // 2
+```
+
+The expression is evaluated once, before its result is passed to the function. That matters for calls with side effects:
+
+```js
+const item = __trace$(0, queue.shift());
+```
+
+If we called `queue.shift()` once for logging and again for the result, we'd unexpectedly remove two items from the queue. That would be quite the debugging tool.
+
+The actual runtime stores **a short description of each value**. Here's what ends up in `values`:
+
+```ts
+import { __trace$, values } from "@toolkit/code-trace/runtime";
+
+__trace$(0, [10, 20, 30]);
+__trace$(1, { name: "Anna", age: 20 });
+__trace$(2, function greet() {});
+
+console.log(values.get(0)); // Array(3)
+console.log(values.get(1)); // { name, age }
+console.log(values.get(2)); // ƒ greet
+```
+
+This way, even a large array fits into a small label. We don't copy its contents; we only record a description.
+
+The `run` set holds the IDs of probes reached **during the current run**. Let's start a new run and see what's left:
+
+```ts
+import { __trace$, values, hits, run, startRun, reset } from "@toolkit/code-trace/runtime";
+
+reset();
+__trace$(0, 42);
+
+console.log([...run]); // [0]
+
+startRun();
+console.log([...run]); // [] — no probes have been reached in the new run yet
+console.log(values.get(0)); // "42" — the last value is still there
+console.log(hits.get(0)); // 1 — so is the hit count
+
+reset();
+console.log(values.size, hits.size, run.size); // 0 0 0
+```
+
+What if a probe is reached a hundred times in a loop? The stored value and hit count update a hundred times, but **the subscriber receives one notification**:
+
+```ts
+import { __trace$, subscribe } from "@toolkit/code-trace/runtime";
+
+let updates = 0;
+const unsubscribe = subscribe(() => updates++);
+
+for (let i = 0; i < 100; i++) {
+    __trace$(0, i);
+}
+
+console.log(updates); // 0
+await Promise.resolve(); // let the queued microtask run
+console.log(updates); // 1
+
+unsubscribe();
+```
+
+The runtime uses `queueMicrotask` to defer the notification. While the synchronous code is running, further hits don't queue more notifications. Once that code finishes and execution yields to the microtask queue, the UI receives a single update with all the accumulated changes.
+
+## Putting it together with Vite
+
+I have a [small project](https://github.com/Nodal-dot/toolkit) where I try out ideas and collect components I like. That's where I built code-trace and added a playground to test it with live examples.
+
+The playground runs on Vite, so a plugin is a convenient way to bring everything together: find the expressions, add the wrappers, and show values alongside the source.
+
+Here's how to register the plugin:
+
+```ts
+import { codeTrace } from "@toolkit/code-trace/vite";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+    plugins: [codeTrace()],
+});
+```
+
+The HTML specifies which file to display:
+
+```html
+<code-trace src="example.ts"></code-trace>
+<script type="module" src="./main.ts"></script>
+```
+
+The plugin finds these elements and keeps track of their source files. For the UI, it loads the original text through `?raw` and the probe offsets through a custom `?probes` query. When the application imports the module itself, the `transform` hook adds the wrappers and the runtime import.
+
+We display the original source, but run **the version with the added `__trace$` calls**. The loaded text and offsets are passed to the web component, which places small value labels next to the expressions.
+
+The element doesn't call the function itself. In the playground, an input event handler does that:
+
+```ts
+import { startRun } from "@toolkit/code-trace/runtime";
+import { check } from "./example.ts";
+
+const input = document.querySelector("input")!;
+
+input.addEventListener("input", () => {
+    startRun();
+    check(Number(input.value));
+});
+```
+
+Change the number, and `check` runs, the values update, and lines with reached probes are highlighted. A line's hit count is the highest hit count among its probes, not their sum: two expressions on one line don't, by themselves, mean the line ran twice.
+
+## Why not just use a debugger?
+
+Sometimes that's exactly what you need.
+
+If I need to pause inside a function and inspect the call stack, closures, or object state, I'd open DevTools. If I only need one value, I'd add a `console.log`. There's no need to build a plugin just for that.
+
+I wanted something visual: run an example and see which expressions were evaluated and what values they produced, right next to the code. No breakpoints to set or logging calls to add by hand. In the playground, all you need to do is change the number in the input.
+
+Some tools charge for similar features. I wanted to try building my own version and find out how it works.
+
+Code-trace is useful for a different kind of task: you have a small algorithm in front of you, change its inputs, and immediately see what happened. You might be exploring early returns, explaining a loop, or testing a few branches in a teaching example.
+
+There are also code coverage tools, which help you find lines and branches your tests didn't reach. But “did this branch run?” is a different question from “what value did this expression produce?” With code-trace, I wanted to see the values as well as which parts of the code ran.
+
+## Where the magic stops
+
+Code-trace still has a few limitations.
+
+In `a && b`, the right-hand side is evaluated only if the left-hand side is truthy. The wrapper preserves that behavior. If `b` wasn't evaluated, we can't show its result.
+
+There's a catch with errors, too. If evaluating an expression throws, `__trace$` is never called: the argument is evaluated first. With `throw new Error(...)`, though, we can record a description of the newly created error object before it is thrown.
+
+Each probe stores **only its latest value**. If a loop runs a hundred times, you won't be able to inspect all hundred results. There is no value history or chronological call log. And `startRun()` simply marks the start of a new run. If two asynchronous operations overlap, their results can get mixed together.
+
+Support for multiple files isn't quite there yet, either. Probe IDs start at zero in each file, but all their values share the same store. Probe `0` from one file can therefore collide with probe `0` from another. We need to include a file identifier.
+
+The name `__trace$` is currently fixed. If the source already declares a variable with that name, there's a conflict. No source map is generated yet, either, which makes it harder to map positions in the transformed code back to the original source.
+
+And one more thing: **returning the same value isn't always enough**. JavaScript can infer an anonymous function's name from the variable it's assigned to. A wrapper can prevent that, so we skip function and class expressions in variable declarations. Each new case needs to be checked separately.
+
+This is already enough for a small playground. There's still plenty of work to do before it could be a general-purpose debugger for an entire project.
+
+What I like most is that you can start with a three-line function. Then you ask, “Could we add these calls automatically?” Suddenly, ASTs no longer feel like something only compiler authors get to use.
+
+The full implementation is in my [toolkit, in the code-trace package](https://github.com/Nodal-dot/toolkit/tree/main/packages/code-trace). Start with `instrument/collect-probes.ts`, then look at `wrap-probe.ts` and `runtime/index.ts`. The `playground` contains an example that connects it all to a number input and a code view.
+
+Good luck with your experiments! May your code work and your coffee stay warm. ☕
