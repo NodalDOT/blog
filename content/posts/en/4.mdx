@@ -1,0 +1,381 @@
+export const metadata = {
+    title: "How Promises Work: Building a Promise Core in TypeScript",
+    subtitle:
+        "Build a minimal Promise implementation and see how executors, microtasks, chaining, and thenables fit together.",
+    date: "2026-11-20",
+    videoUrl: "/posts/videos/4.mp4",
+    image: {
+        src: "/posts/images/4-promise.webp",
+        thumbnailSrc: "/posts/images/4-promise-card.webp",
+        alt: "Promise example with console output in order: before, executor, after, 42",
+    },
+};
+
+I love digging through source code. I like it even more when something looks simple at first and turns out to have more going on. Take promises. You've probably heard the interview question "What is a Promise?" It's a way to represent an operation that will eventually succeed or fail. What could be so complicated about that?
+
+Then you open the spec and find that the function you pass to `new Promise` runs synchronously. It even has a name in the spec: the **executor**. A `then` handler, on the other hand, always runs later, even when the result is already available. And if that handler returns an object with a callable `then` method, the next promise follows that object's outcome.
+
+If any of that surprised you, keep reading. If it all sounds familiar, let's use it to build our own Promise. We'll follow the [ECMAScript specification](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-objects) along the way.
+
+## Promise states
+
+A promise has three possible states:
+
+- **pending** — the outcome is still unknown.
+- **fulfilled** — the promise has a fulfillment value.
+- **rejected** — the promise has a rejection reason.
+
+A promise is **settled** once it's either fulfilled or rejected. From then on, its state and result stay the same.
+
+Here's one way to model that in TypeScript:
+
+```ts
+type PromiseState<T> =
+    | { status: "pending" }
+    | { status: "fulfilled"; value: T }
+    | { status: "rejected"; reason: unknown };
+```
+
+This TypeScript type is our model for the article. ECMAScript uses two internal slots: `[[PromiseState]]` for the state and `[[PromiseResult]]` for the fulfillment value or rejection reason. Internal slots are part of how the spec describes an object. You can't read them as ordinary properties.
+
+## The executor and the result
+
+Let's look at what runs when. This example follows the [Promise constructor algorithm](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-executor):
+
+```js
+console.log("before");
+
+const promise = new Promise((resolve) => {
+    console.log("executor");
+    resolve(42);
+});
+
+promise.then((value) => console.log(value));
+console.log("after");
+
+// before
+// executor
+// after
+// 42
+```
+
+The executor runs as part of creating the promise. The `then` handler runs later, even though the promise is already fulfilled when we attach the handler. That's why `42` appears after `"after"`.
+
+The executor can be a named function. The constructor passes it two functions, `resolve` and `reject`. You call `resolve` with a value or a thenable, and `reject` with a rejection reason. If the executor throws before calling either function, the promise is rejected with the thrown value.
+
+Calling `resolve` doesn't always fulfill the promise right away. If you pass it an object with a callable `then`, including a built-in promise, your promise follows that object's outcome. An object like this is called a **thenable**. Once either `resolve` or `reject` has been called, any later calls to that pair have no effect.
+
+## A look at the spec
+
+Take a deep breath. 🙂 Here's a quick look at the [internal slots of Promise instances](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-properties-of-promise-instances):
+
+```text
+[[PromiseState]]: pending | fulfilled | rejected
+[[PromiseResult]]: fulfillment value or rejection reason
+[[PromiseFulfillReactions]]: fulfillment reactions
+[[PromiseRejectReactions]]: rejection reactions
+[[PromiseIsHandled]]: whether the promise has been marked as handled
+```
+
+The slot names and states come from the spec. The descriptions are shortened. Reactions record what should happen when a promise settles. For example, when you pass fulfillment and rejection handlers to `then`, those handlers need to run at the right time.
+
+You can breathe again. Let's see how some of those slots translate into fields on our own class.
+
+## Building our own promise
+
+We'll call the class `PromiseCore`, after the [implementation in toolkit](https://nodaldot.github.io/toolkit/?item=vanilla%2Finternals%2FpromiseCore) we'll use as a reference.
+
+TypeScript gives us a starting point in its standard library declarations. The `PromiseLike<T>` interface describes a promise-like object with a `then` method. That method accepts fulfillment and rejection handlers and returns a new `PromiseLike` whose value type reflects what the handlers return.
+
+```ts
+export class PromiseCore<T> implements PromiseLike<T> {
+    // The state, constructor, and then method will go here.
+}
+```
+
+`T` is the type of the fulfillment value. For example, the fulfillment handler for a `PromiseCore<number>` receives a number. The `implements` clause asks TypeScript to check that our class has a compatible `then` method. We still have to write that method ourselves. Until we do, this sketch won't type-check.
+
+`PromiseLike` is enough for what we're building here: a promise core that can chain through `then`. To resolve a promise with an object, ECMAScript looks up the object's `then` property at runtime. The spec also has a separate operation, `IsPromise`, for cases that require identifying a built-in Promise instance.
+
+First, the class needs somewhere to store its result and the reactions waiting for it.
+
+```ts
+type PromiseStatus = "pending" | "fulfilled" | "rejected";
+const PENDING: PromiseStatus = "pending";
+type Reaction = (result: unknown) => void;
+
+// Fields inside PromiseCore<T>
+#status: PromiseStatus = PENDING;
+#result: unknown = undefined;
+#fulfillReactions: Reaction[] = [];
+#rejectReactions: Reaction[] = [];
+```
+
+A new promise starts out `pending`. We initialize `#result` to `undefined`. The status is what tells us whether a result is available, since a fulfilled promise can also hold `undefined`. The two arrays store fulfillment and rejection reactions. The `#` prefix makes these fields private, so code outside the class can't access them directly.
+
+## Checking the executor
+
+The built-in `Promise` constructor throws a `TypeError` if the executor isn't callable. Here's the relevant step in the [constructor algorithm](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-executor):
+
+```text
+If IsCallable(executor) is false, throw a TypeError exception.
+```
+
+`IsCallable` checks whether the value can be called.
+
+In TypeScript, we can describe the functions the constructor passes to the executor:
+
+```ts
+type Resolve<T> = (resolution: T | PromiseLike<T>) => void;
+type Reject = (reason?: unknown) => void;
+type Executor<T> = (resolve: Resolve<T>, reject: Reject) => void;
+
+// Inside PromiseCore<T>
+constructor(executor: Executor<T>) {
+    if (typeof executor !== "function") {
+        throw new TypeError("Executor must be a function");
+    }
+
+    const { resolve, reject } = this.#createResolvingFunctions();
+
+    try {
+        executor(resolve, reject);
+    } catch (error) {
+        reject(error);
+    }
+}
+```
+
+TypeScript can catch an invalid argument at compile time. The types are erased at runtime, and plain JavaScript can call the class too. That's why the constructor needs its own check.
+
+Next we create `resolve` and `reject`, then call the executor immediately with both functions. The `try...catch` passes anything the executor throws to `reject`. If the executor has already called either function, that later call to `reject` must have no effect.
+
+`#createResolvingFunctions` handles the value passed to `resolve` and makes sure only the first call to the pair counts.
+
+## Where resolve and reject come from
+
+We're used to having these functions handed to us:
+
+```ts
+new PromiseCore<number>((resolve, reject) => {
+    resolve(42);
+    // Or reject(new Error("Something went wrong"));
+});
+```
+
+Now that we're writing the promise ourselves, we have to create the functions too. `#createResolvingFunctions` returns a `{ resolve, reject }` pair. Both functions act on the same promise and share a record of whether either one has already been called.
+
+We'll come back to resolving with another promise. First, let's see what happens when the outcome is already known.
+
+## Settling the promise
+
+We use `#fulfill` for a fulfillment value and `#reject` for a rejection reason. Both call the same `#settle` method:
+
+```ts
+#settle(status: PromiseStatus, result: unknown, reactions: Reaction[]) {
+    this.#status = status;
+    this.#result = result;
+    this.#fulfillReactions = [];
+    this.#rejectReactions = [];
+    reactions.forEach((reaction) => queueMicrotask(() => reaction(result)));
+}
+
+#fulfill(value: unknown) {
+    this.#settle(FULFILLED, value, this.#fulfillReactions);
+}
+
+#reject(reason: unknown) {
+    this.#settle(REJECTED, reason, this.#rejectReactions);
+}
+```
+
+`FULFILLED` and `REJECTED` hold the strings `"fulfilled"` and `"rejected"`. The method stores the state and result, resets both arrays, and queues the relevant reactions. The array passed into `#settle` is still available through the `reactions` parameter because we assigned new arrays to the fields. We didn't empty the old array in place.
+
+ECMAScript defines separate operations, [FulfillPromise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-fulfillpromise) and [RejectPromise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-rejectpromise). Each stores the result, updates the state, and triggers the corresponding reactions. Our method shares those steps between the two paths. Both paths leave the promise settled.
+
+## Why queueMicrotask?
+
+Remember those interview questions about the event loop? We've made it to microtasks. If we called a `then` handler directly from `#settle`, it could run before the current synchronous code finished. We use `queueMicrotask` to queue each reaction for later.
+
+Here's how the example from the beginning plays out in a browser:
+
+```text
+Current code:  "before" → executor → resolve(42) → "after"
+Microtasks:    then handler → 42
+Browser:       updates rendering if needed
+```
+
+In this example, the browser drains the microtask queue after the current task and before it may update rendering. That includes microtasks queued while other microtasks are running. This is a simplified timeline. Rendering doesn't necessarily happen after every task. ECMAScript defines Promise jobs, and the browser host queues those jobs as microtasks. The browser event loop is described in the [HTML Standard](https://html.spec.whatwg.org/multipage/webappapis.html#event-loops).
+
+## Attaching handlers with then
+
+Now we need to give those reaction arrays something to hold. `then` also returns a **new** promise, which is what lets us chain calls:
+
+```ts
+new PromiseCore<number>((resolve) => resolve(2))
+    .then((value) => value * 2)
+    .then((value) => console.log(value)); // 4
+```
+
+The first handler returns `4`, so the next promise is fulfilled with that value. If the handler throws, the next promise is rejected.
+
+To make chaining work, we'll save the functions that can resolve or reject the next promise:
+
+```ts
+let resolveNext!: Resolve<R1 | R2>;
+let rejectNext!: Reject;
+const next = new PromiseCore<R1 | R2>((resolve, reject) => {
+    resolveNext = resolve;
+    rejectNext = reject;
+});
+```
+
+The executor runs synchronously, so the functions are assigned before we use them. The exclamation marks are definite assignment assertions. They tell TypeScript that the variables will be assigned before they're read. For now, `next` is pending.
+
+What we pass to those functions depends on which handler runs and whether one was provided:
+
+```ts
+const runFulfilled: Reaction = (value) => {
+    if (typeof onFulfilled !== "function") {
+        resolveNext(value as R1);
+        return;
+    }
+    try {
+        resolveNext(onFulfilled(value as T));
+    } catch (error) {
+        rejectNext(error);
+    }
+};
+
+const runRejected: Reaction = (reason) => {
+    if (typeof onRejected !== "function") {
+        rejectNext(reason);
+        return;
+    }
+    try {
+        resolveNext(onRejected(reason));
+    } catch (error) {
+        rejectNext(error);
+    }
+};
+```
+
+If there's no fulfillment handler, the value passes through. If there's no rejection handler, the reason passes through as a rejection. If `onRejected` returns a value, we call `resolveNext`, so the chain can recover from the rejection. An exception thrown by either handler rejects `next`.
+
+Now we can decide when to run the reactions:
+
+```ts
+if (this.#status === PENDING) {
+    this.#fulfillReactions.push(runFulfilled);
+    this.#rejectReactions.push(runRejected);
+} else {
+    const reaction = this.#status === FULFILLED ? runFulfilled : runRejected;
+    const result = this.#result;
+    queueMicrotask(() => reaction(result));
+}
+
+return next;
+```
+
+If the original promise is still pending, we store both reactions so `#settle` can use the right one later. If it's already settled, we queue the appropriate reaction immediately. Either way, the handler runs after the current synchronous code.
+
+In the full signature, `then<R1 = T, R2 = never>`, `R1` describes the fulfillment handler's result type and `R2` describes the rejection handler's. The method returns `PromiseCore<R1 | R2>`. You can find the full method and its type declarations in the [source code](https://github.com/Nodal-dot/toolkit/blob/main/snippets/vanilla/internals/promiseCore/promiseCore.ts).
+
+That makes `catch` a one-liner:
+
+```ts
+catch<R = never>(onRejected?: OnRejected<R>): PromiseCore<T | R> {
+    return this.then(undefined, onRejected);
+}
+```
+
+It attaches a rejection handler through `then` and returns the resulting promise.
+
+## Implementing resolve and reject
+
+Back to the functions we pass to the executor. Each pair shares an `alreadyResolved` flag:
+
+```ts
+#createResolvingFunctions(): { resolve: Resolve<unknown>; reject: Reject } {
+    let alreadyResolved = false;
+
+    const resolve: Resolve<unknown> = (resolution) => {
+        if (alreadyResolved) return;
+        alreadyResolved = true;
+        // Handle resolution here.
+    };
+
+    const reject: Reject = (reason) => {
+        if (alreadyResolved) return;
+        alreadyResolved = true;
+        this.#reject(reason);
+    };
+
+    return { resolve, reject };
+}
+```
+
+Suppose `resolve` takes another promise that's still pending. Our promise stays pending too, but it's already committed to following the other promise. The flag makes sure that a later call to `resolve` or `reject` can't override that decision. This is how a promise can be **resolved** while it's still **pending**.
+
+`reject` passes the reason straight to `#reject`. For `resolve`, we first check what we were given.
+
+```ts
+if (resolution === this) {
+    this.#reject(new TypeError("Chaining cycle detected"));
+    return;
+}
+if (!isObject(resolution)) {
+    this.#fulfill(resolution);
+    return;
+}
+```
+
+Resolving a promise with itself rejects it with a `TypeError`. A primitive can be used immediately as the fulfillment value. Our `isObject` check includes functions because they can have a `then` property too.
+
+For an object, we have to read its `then` property. Even that read can throw, for example if `then` is a getter:
+
+```ts
+let then: unknown;
+try {
+    then = (resolution as { then?: unknown }).then;
+} catch (error) {
+    this.#reject(error);
+    return;
+}
+if (typeof then !== "function") {
+    this.#fulfill(resolution);
+    return;
+}
+```
+
+We read `then` once. If it isn't callable, we fulfill the promise with the object itself. If it is callable, we've found a thenable and need to adopt its outcome.
+
+## Adopting a thenable's outcome
+
+We've read the thenable's `then` property. Now we need to call it so it can report its outcome:
+
+```ts
+const adopt = then;
+queueMicrotask(() => {
+    const { resolve, reject } = this.#createResolvingFunctions();
+    try {
+        adopt.call(resolution, resolve, reject);
+    } catch (error) {
+        reject(error);
+    }
+});
+```
+
+We defer the call to `then` to a microtask. We use `call` to pass the thenable as `this`, since its method may need to access its own properties. ECMAScript creates a separate job for this through [NewPromiseResolveThenableJob](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-newpromiseresolvethenablejob).
+
+Why create a fresh pair of resolving functions? The original pair's flag is already set. The fresh pair gives the thenable a way to report its outcome and ignores any subsequent attempts. If its `then` method calls `resolve` and then throws, the `reject` call in the `catch` block has no effect. If it throws before calling either function, the promise is rejected with the thrown value.
+
+That's why our `then` method passes the handler's return value to `resolveNext`. If the handler returns a promise or another thenable, the next promise follows its outcome. If it returns an ordinary value, the next promise is fulfilled with that value.
+
+## What we built
+
+We built a promise core with a synchronous executor, resolving functions that act only on the first call, deferred reactions, chaining, and thenable adoption. `PromiseCore` is an implementation for learning. The built-in `Promise` also has features outside its scope, including static methods such as `Promise.all` and host tracking of unhandled rejections.
+
+The next time someone asks you "What is a Promise?", take a moment to think, scratch your head, have a coffee, and look out the window. Then maybe give them the short answer. Otherwise, half an hour later, you may still be explaining what happens when `resolve` finds a callable `then`, and your interviewer will have finished their coffee and started looking out the window too.
+
+Have fun experimenting. May your code run before your coffee goes cold. ☕

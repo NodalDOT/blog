@@ -1,0 +1,383 @@
+export const metadata = {
+    title: "Как устроен Promise: пишем своё ядро на TypeScript",
+    subtitle:
+        "Собираем ядро промиса и разбираемся, как работают executor, микрозадачи, цепочки и thenable.",
+    date: "2026-11-20",
+    videoUrl: "/posts/videos/4.mp4",
+    image: {
+        src: "/posts/images/4-promise.webp",
+        thumbnailSrc: "/posts/images/4-promise-card.webp",
+        alt: "Пример с Promise и порядок вывода в консоль: before, executor, after, 42",
+    },
+};
+
+Я люблю копаться в исходниках. Но ещё больше люблю разбирать вещи, которые на первый взгляд кажутся простыми. Например, промисы. Наверняка каждому встречался вопрос на собеседовании: «Что такое Promise?» Ну, обещание, которое когда-нибудь выполнится или завершится с ошибкой. Что тут сложного?
+
+А потом открываешь спецификацию и обнаруживаешь, что функция, которую мы передаём в `new Promise`, вызывается синхронно. У неё даже есть имя на языке спецификации — executor. При этом обработчик `then` всегда вызывается позже, даже если результат уже готов. А если вернуть из него объект с методом `then`, промис попробует разобраться с этим объектом сам.
+
+Если я вас хотя бы немного удивил, давайте продолжим. А если нет — заодно освежим знания и попробуем разобраться, из каких деталей можно собрать собственный Promise. Опираться будем на [спецификацию ECMAScript](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-objects).
+
+## Начнём с лексикона
+
+У промиса есть три состояния:
+
+- **pending** — результат ещё не определён;
+- **fulfilled** — операция успешно завершилась, у промиса есть значение;
+- **rejected** — операция завершилась с ошибкой, у промиса есть причина отклонения.
+
+Fulfilled и rejected вместе называют **settled**: промис больше не находится в ожидании. После этого состояние и результат уже не меняются.
+
+На TypeScript такую модель можно описать примерно так:
+
+```ts
+type PromiseState<T> =
+    | { status: "pending" }
+    | { status: "fulfilled"; value: T }
+    | { status: "rejected"; reason: unknown };
+```
+
+Это наша учебная модель, а не код из спецификации. В самой спецификации состояние хранится во внутреннем слоте `[[PromiseState]]`, а значение или причина — в `[[PromiseResult]]`. Внутренние слоты нельзя прочитать как обычные свойства объекта: они нужны спецификации, чтобы описать поведение промиса.
+
+## Исполнитель и результат
+
+Посмотрим на порядок выполнения. Этот пример иллюстрирует поведение, описанное в [алгоритме конструктора Promise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-executor):
+
+```js
+console.log("до");
+
+const promise = new Promise((resolve) => {
+    console.log("executor");
+    resolve(42);
+});
+
+promise.then((value) => console.log(value));
+console.log("после");
+
+// до
+// executor
+// после
+// 42
+```
+
+Executor вызывается во время создания промиса. А вот обработчик `then` запускается позже, даже если к моменту подписки промис уже выполнен. Поэтому `42` появляется после строки «после».
+
+Функция executor не обязана быть анонимной. Конструктор передаёт ей две функции: `resolve` и `reject`. Через первую мы передаём результат, через вторую — причину отказа. Если executor выбросит ошибку до первого вызова `resolve` или `reject`, промис будет отклонён.
+
+Тут есть важный нюанс: вызов `resolve` не всегда сразу переводит промис в fulfilled. Если передать ему объект с вызываемым `then`, в том числе обычный промис, наш промис будет следовать его результату. Такой объект называют **thenable**, или промисоподобным. При этом после первого вызова `resolve` или `reject` последующие вызовы этих функций уже не изменят результат.
+
+## Заглянем в спецификацию
+
+Итак, советую задержать дыхание: дальше будет немного языка спецификации. 🙂 Вот сокращённая запись из описания [внутренних слотов экземпляра Promise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-properties-of-promise-instances):
+
+```text
+[[PromiseState]]: pending | fulfilled | rejected
+[[PromiseResult]]: значение результата или причина отказа
+[[PromiseFulfillReactions]]: реакции на успешное выполнение
+[[PromiseRejectReactions]]: реакции на отказ
+[[PromiseIsHandled]]: был ли промис отмечен как обработанный
+```
+
+Названия слотов и состояния взяты из спецификации; описания справа сокращены для наглядности. Реакции помогают запомнить, что нужно сделать, когда промис получит результат. Например, при вызове `then` мы передаём обработчики успеха и ошибки — их ещё нужно будет вызвать в подходящий момент.
+
+Дышать можно. Теперь попробуем уместить часть этих слотов в собственном классе.
+
+## Создаём свой промис
+
+Назовём наш класс `PromiseCore`: именно так он называется в [реализации в toolkit](https://nodaldot.github.io/toolkit/?item=vanilla%2Finternals%2FpromiseCore), на которую мы будем опираться.
+
+Пишем на TypeScript, поэтому сразу посмотрим, от какого типа можно оттолкнуться. В стандартных объявлениях TypeScript есть `PromiseLike<T>` — интерфейс промисоподобного объекта. Он описывает метод `then`: тот принимает обработчики результата и ошибки и возвращает новый `PromiseLike` с типом результата обработчиков.
+
+```ts
+export class PromiseCore<T> implements PromiseLike<T> {
+    // Здесь появятся состояние, конструктор и метод then.
+}
+```
+
+`T` — тип значения при успешном выполнении. Например, у `PromiseCore<number>` обработчик успеха получит число. Запись `implements` просит TypeScript проверить, что у класса есть подходящий `then`. Сам метод она за нас не создаёт и поведение промиса не обеспечивает: это всё ещё наша работа. Пока метод не написан, приведённый выше набросок не пройдёт проверку типов.
+
+Почему именно `PromiseLike`, а не `Promise`? Мы начинаем с ядра и цепочки через `then`, а не обещаем сразу реализовать весь интерфейс встроенного промиса. При разрешении значения спецификация проверяет его свойство `then`, а не TypeScript-интерфейс. При этом для других задач в спецификации есть и отдельная проверка того, является ли объект настоящим промисом.
+
+Для начала заглянем внутрь класса: где-то же ему нужно хранить результат и тех, кто его ждёт.
+
+```ts
+type PromiseStatus = "pending" | "fulfilled" | "rejected";
+const PENDING: PromiseStatus = "pending";
+type Reaction = (result: unknown) => void;
+
+// Поля внутри PromiseCore<T>
+#status: PromiseStatus = PENDING;
+#result: unknown = undefined;
+#fulfillReactions: Reaction[] = [];
+#rejectReactions: Reaction[] = [];
+```
+
+Новый промис начинает жизнь в состоянии `pending`. Результата пока нет, поэтому в `#result` лежит `undefined`; само по себе это значение не говорит о состоянии, ведь успешно выполненный промис тоже может вернуть `undefined`. Два массива будут хранить реакции на успех и отказ. Решётка делает поля приватными: обратиться к ним снаружи экземпляра не получится.
+
+## Проверяем executor
+
+В конструктор промиса нужно передать функцию. Если её нет, встроенный `Promise` выбросит `TypeError`. Вот соответствующий шаг [алгоритма конструктора в спецификации](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-executor):
+
+```text
+If IsCallable(executor) is false, throw a TypeError exception.
+```
+
+`IsCallable` проверяет, можно ли вызвать переданное значение. Если нет — выбрасываем `TypeError`.
+
+В TypeScript мы можем заранее описать функции, которые executor получит от конструктора:
+
+```ts
+type Resolve<T> = (resolution: T | PromiseLike<T>) => void;
+type Reject = (reason?: unknown) => void;
+type Executor<T> = (resolve: Resolve<T>, reject: Reject) => void;
+
+// Внутри PromiseCore<T>
+constructor(executor: Executor<T>) {
+    if (typeof executor !== "function") {
+        throw new TypeError("Executor must be a function");
+    }
+
+    const { resolve, reject } = this.#createResolvingFunctions();
+
+    try {
+        executor(resolve, reject);
+    } catch (error) {
+        reject(error);
+    }
+}
+```
+
+TypeScript предупредит, если передать в конструктор что-то не то. Но при выполнении JavaScript типов уже нет, а наш класс могут вызвать и из обычного JavaScript. Поэтому проверка внутри конструктора всё равно нужна.
+
+Дальше мы создаём `resolve` и `reject`, а затем сразу вызываем executor, передавая ему обе функции. Вызов обёрнут в `try...catch`: если executor выбросит ошибку, передадим её в `reject`. Если он уже вызвал `resolve` или `reject`, последующий `reject` не должен изменить принятое решение.
+
+За обработку значений и защиту от повторного изменения результата отвечает `#createResolvingFunctions`.
+
+
+## Откуда берутся resolve и reject
+
+Мы привыкли получать эти функции готовыми:
+
+```ts
+new PromiseCore<number>((resolve, reject) => {
+    resolve(42);
+    // Или reject(new Error("Что-то пошло не так"));
+});
+```
+
+Но теперь промис пишем мы, так что и функции придётся создать самим. `#createResolvingFunctions` возвращает пару `{ resolve, reject }`. Обе функции работают с одним экземпляром промиса и помнят, была ли уже вызвана одна из них.
+
+Пока отложим случай с другим промисом и посмотрим, что происходит, когда результат уже известен.
+
+## Завершаем промис
+
+Для успешного результата у нас есть `#fulfill`, для ошибки — `#reject`. Оба метода вызывают общий `#settle`:
+
+```ts
+#settle(status: PromiseStatus, result: unknown, reactions: Reaction[]) {
+    this.#status = status;
+    this.#result = result;
+    this.#fulfillReactions = [];
+    this.#rejectReactions = [];
+    reactions.forEach((reaction) => queueMicrotask(() => reaction(result)));
+}
+
+#fulfill(value: unknown) {
+    this.#settle(FULFILLED, value, this.#fulfillReactions);
+}
+
+#reject(reason: unknown) {
+    this.#settle(REJECTED, reason, this.#rejectReactions);
+}
+```
+
+Здесь `FULFILLED` и `REJECTED` — константы со строками `"fulfilled"` и `"rejected"`. Метод сохраняет состояние и результат, очищает оба массива и ставит нужные реакции в очередь. Переданный массив реакций при этом не пропадает: мы заменили поля новыми массивами, а не очистили старый массив на месте.
+
+В спецификации нет общего метода `#settle`: там есть отдельные операции [FulfillPromise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-fulfillpromise) и [RejectPromise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-rejectpromise). В обеих сохраняются результат и новое состояние, после чего запускаются соответствующие реакции. Наш метод объединяет эти общие шаги. Само слово settled обозначает итоговое состояние, а не третий способ завершить промис.
+
+## А почему queueMicrotask?
+
+Помните вопросы про event loop на собеседовании? Вот мы и добрались до микрозадач. Обработчик `then` нельзя вызвать прямо внутри `#settle`: иначе он мог бы выполниться до окончания текущего кода. Поэтому каждая реакция попадает в очередь через `queueMicrotask`.
+
+Для примера из начала статьи порядок в браузере будет таким:
+
+```text
+Текущий код:     «до» → executor → resolve(42) → «после»
+Микрозадачи:     обработчик then → 42
+Браузер:         при необходимости обновляет отображение
+```
+
+В этой схеме браузер выполняет накопившиеся микрозадачи после текущей задачи и перед возможным обновлением отображения. Новые микрозадачи, добавленные во время их выполнения, тоже будут обработаны. Это упрощённая схема: браузер не обязан рисовать после каждой задачи. Сама спецификация ECMAScript описывает задания промисов, а связь с очередью микрозадач обеспечивает среда выполнения. Подробности браузерного цикла событий описаны в [HTML Standard](https://html.spec.whatwg.org/multipage/webappapis.html#event-loops).
+
+## Подписываемся через then
+
+Теперь нам нужно наполнить массивы реакций. Но у `then` есть ещё одна работа: он возвращает **новый** промис. Благодаря этому можно строить цепочки:
+
+```ts
+new PromiseCore<number>((resolve) => resolve(2))
+    .then((value) => value * 2)
+    .then((value) => console.log(value)); // 4
+```
+
+Первый обработчик возвращает `4`, и это значение получает следующий промис. Если обработчик выбросит ошибку, следующий промис будет отклонён.
+
+Для цепочки нам понадобится сохранить функции, которые смогут завершить следующий промис:
+
+```ts
+let resolveNext!: Resolve<R1 | R2>;
+let rejectNext!: Reject;
+const next = new PromiseCore<R1 | R2>((resolve, reject) => {
+    resolveNext = resolve;
+    rejectNext = reject;
+});
+```
+
+Executor вызывается сразу, поэтому функции успеют сохраниться до использования. Восклицательный знак сообщает TypeScript, что переменные будут присвоены. Сам `next` пока ожидает результата обработчика.
+
+А что передать этим функциям? Зависит от того, какой обработчик вызван и есть ли он вообще:
+
+```ts
+const runFulfilled: Reaction = (value) => {
+    if (typeof onFulfilled !== "function") {
+        resolveNext(value as R1);
+        return;
+    }
+    try {
+        resolveNext(onFulfilled(value as T));
+    } catch (error) {
+        rejectNext(error);
+    }
+};
+
+const runRejected: Reaction = (reason) => {
+    if (typeof onRejected !== "function") {
+        rejectNext(reason);
+        return;
+    }
+    try {
+        resolveNext(onRejected(reason));
+    } catch (error) {
+        rejectNext(error);
+    }
+};
+```
+
+Если обработчика успеха нет, значение идёт дальше. Если нет обработчика ошибки, дальше идёт ошибка. А вот когда `onRejected` есть и возвращает значение, мы вызываем `resolveNext`: ошибку обработали, цепочка может продолжиться успешно. Ошибка, выброшенная любым из обработчиков, отклонит `next`.
+
+Осталось решить, когда запускать реакции:
+
+```ts
+if (this.#status === PENDING) {
+    this.#fulfillReactions.push(runFulfilled);
+    this.#rejectReactions.push(runRejected);
+} else {
+    const reaction = this.#status === FULFILLED ? runFulfilled : runRejected;
+    const result = this.#result;
+    queueMicrotask(() => reaction(result));
+}
+
+return next;
+```
+
+Если исходный промис ещё ждёт результата, сохраняем обе реакции: нужную выберет `#settle`. Если результат уже есть, ставим подходящую реакцию в очередь сразу. В обоих случаях обработчик выполнится позже текущего кода.
+
+В полной сигнатуре `then<R1 = T, R2 = never>` тип `R1` описывает результат обработчика успеха, а `R2` — обработчика ошибки. Возвращается `PromiseCore<R1 | R2>`. Полный метод вместе с объявлениями типов можно посмотреть в [исходнике](https://github.com/Nodal-dot/toolkit/blob/main/snippets/vanilla/internals/promiseCore/promiseCore.ts).
+
+А `catch` теперь почти бесплатный:
+
+```ts
+catch<R = never>(onRejected?: OnRejected<R>): PromiseCore<T | R> {
+    return this.then(undefined, onRejected);
+}
+```
+
+Он просто подписывается на ошибку через `then` и тоже возвращает новый промис.
+
+## Реализуем resolve и reject
+
+Вернёмся к функциям, которые получает executor. У каждой созданной пары есть общий флаг `alreadyResolved`:
+
+```ts
+#createResolvingFunctions(): { resolve: Resolve<unknown>; reject: Reject } {
+    let alreadyResolved = false;
+
+    const resolve: Resolve<unknown> = (resolution) => {
+        if (alreadyResolved) return;
+        alreadyResolved = true;
+        // Здесь разберём resolution.
+    };
+
+    const reject: Reject = (reason) => {
+        if (alreadyResolved) return;
+        alreadyResolved = true;
+        this.#reject(reason);
+    };
+
+    return { resolve, reject };
+}
+```
+
+Флаг нужен не только для защиты уже завершённого промиса. `resolve` может принять другой промис, результат которого ещё неизвестен. Наш промис в этот момент остаётся pending, но решение следовать чужому результату уже принято. Поэтому второй вызов `resolve` или `reject` должен быть проигнорирован.
+
+С `reject` всё просто: причина передаётся в `#reject` как есть. А `resolve` сначала проверяет, что ему передали.
+
+```ts
+if (resolution === this) {
+    this.#reject(new TypeError("Chaining cycle detected"));
+    return;
+}
+if (!isObject(resolution)) {
+    this.#fulfill(resolution);
+    return;
+}
+```
+
+Промис не может ждать самого себя, поэтому в первом случае получаем `TypeError`. Примитив же можно сразу сохранить как успешный результат. `isObject` здесь считает объектами и функции: у них тоже может быть свойство `then`.
+
+С объектами сложнее. Нам нужно прочитать `then`, но даже чтение свойства может выбросить ошибку, например если это геттер:
+
+```ts
+let then: unknown;
+try {
+    then = (resolution as { then?: unknown }).then;
+} catch (error) {
+    this.#reject(error);
+    return;
+}
+if (typeof then !== "function") {
+    this.#fulfill(resolution);
+    return;
+}
+```
+
+Читаем `then` один раз. Если это не функция, перед нами обычное значение, которым можно выполнить промис. Если функция — нашли thenable и должны дождаться его результата.
+
+## Принимаем результат thenable
+
+Мы нашли чужой `then`. Осталось попросить его сообщить нам результат:
+
+```ts
+const adopt = then;
+queueMicrotask(() => {
+    const { resolve, reject } = this.#createResolvingFunctions();
+    try {
+        adopt.call(resolution, resolve, reject);
+    } catch (error) {
+        reject(error);
+    }
+});
+```
+
+Вызов `then` откладывается в микрозадачу. Через `call` передаём объект как `this`: его метод может обращаться к собственным полям. В спецификации для этого создаётся отдельное [задание разрешения промиса через thenable](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-newpromiseresolvethenablejob).
+
+Зачем новая пара функций? Старая уже вызвана и её флаг установлен. Новая пара позволит thenable передать нам свой результат, но при этом защитит от повторных вызовов с его стороны. Если `then` вызовет `resolve`, а потом выбросит ошибку, вызов `reject` в `catch` уже ничего не изменит. Если же ошибка возникнет раньше, промис будет отклонён.
+
+Теперь становится понятно, почему в `then` мы передавали результат обработчика в `resolveNext`: если обработчик вернёт промис или другой thenable, следующий промис дождётся его. Если вернёт обычное значение — выполнится с этим значением.
+
+## Что получилось
+
+Мы собрали ядро промиса: синхронный executor, однократное разрешение, отложенные реакции, цепочки и принятие результата thenable. При этом `PromiseCore` остаётся учебной реализацией, а не полной заменой встроенного `Promise`: например, здесь нет статических методов вроде `Promise.all` и отслеживания необработанных отказов средой.
+
+В следующий раз, когда услышите вопрос «Что такое Promise?», задумайтесь, почешите голову, выпейте кружку кофе и посмотрите в окно. А потом, пожалуй, дайте короткий ответ. Иначе есть риск, что через полчаса вы всё ещё будете рассказывать про чужой `then`, а собеседующий уже допьёт свой кофе и тоже начнёт смотреть в окно.
+
+
+Удачи с экспериментами! Пусть код работает, а кофе не успевает остыть ☕
