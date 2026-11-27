@@ -6,7 +6,8 @@ const SITE_URL = BASE_SEO.en.url;
 const STATIC_PATHS = ["", "/about", "/posts"];
 
 type SitemapEntry = {
-    url: string;
+    locale: (typeof routing.locales)[number];
+    path: string;
     lastModified?: string;
 };
 
@@ -30,7 +31,7 @@ function getLatestPostDate(posts: Post[]) {
     }, undefined);
 }
 
-function getStaticEntries(locale: string, posts: Post[]) {
+function getStaticEntries(locale: SitemapEntry["locale"], posts: Post[]) {
     const latest = getLatestPostDate(posts);
 
     return STATIC_PATHS.map((pagePath) => {
@@ -38,7 +39,8 @@ function getStaticEntries(locale: string, posts: Post[]) {
         const tracksPosts = pagePath !== "/about";
 
         return {
-            url: `${SITE_URL}/${locale}${pagePath}`,
+            locale,
+            path: pagePath,
             ...(latest && tracksPosts
                 ? { lastModified: formatLastModified(new Date(latest)) }
                 : {}),
@@ -46,11 +48,16 @@ function getStaticEntries(locale: string, posts: Post[]) {
     });
 }
 
-function getPostEntries(locale: string, posts: Post[]) {
+function getPostEntries(locale: SitemapEntry["locale"], posts: Post[]): SitemapEntry[] {
     return posts.map((post) => ({
-        url: `${SITE_URL}/${locale}/posts/${post.id}`,
+        locale,
+        path: `/posts/${post.id}`,
         lastModified: formatLastModified(new Date(post.updated ?? post.date)),
     }));
+}
+
+function getEntryUrl({ locale, path }: SitemapEntry) {
+    return `${SITE_URL}/${locale}${path}`;
 }
 
 export async function GET() {
@@ -61,18 +68,31 @@ export async function GET() {
         })
     );
     const entries: SitemapEntry[] = localizedEntries.flat();
+    const entriesByPath = Map.groupBy(entries, (entry) => entry.path);
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${entries
-    .map(({ url, lastModified }) =>
-        [
+    .map((entry) => {
+        const alternates = entriesByPath.get(entry.path) ?? [];
+        const defaultEntry = alternates.find(({ locale }) => locale === routing.defaultLocale);
+        return [
             "  <url>",
-            `    <loc>${escapeXml(url)}</loc>`,
-            ...(lastModified ? [`    <lastmod>${lastModified}</lastmod>`] : []),
+            `    <loc>${escapeXml(getEntryUrl(entry))}</loc>`,
+            ...(entry.lastModified ? [`    <lastmod>${entry.lastModified}</lastmod>`] : []),
+            ...alternates.map(
+                (alternate) =>
+                    `    <xhtml:link rel="alternate" hreflang="${alternate.locale}" href="${escapeXml(getEntryUrl(alternate))}" />`
+            ),
+            ...(defaultEntry
+                ? [
+                      `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(getEntryUrl(defaultEntry))}" />`,
+                  ]
+                : []),
             "  </url>",
-        ].join("\n")
-    )
+        ].join("\n");
+    })
     .join("\n")}
 </urlset>`;
 
