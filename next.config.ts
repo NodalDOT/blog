@@ -9,6 +9,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    async headers() {
+        return [
+            {
+                source: "/posts/:directory(images|videos)/:file",
+                headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+            },
+        ];
+    },
 };
 
 const withNextIntl = createNextIntlPlugin("./src/shared/i18n/request.ts");
