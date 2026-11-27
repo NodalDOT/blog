@@ -20,10 +20,6 @@ interface PostsSwiperProps {
 const PostsSwiper: FC<PostsSwiperProps> = (props) => {
     const { posts, onReady, paginationClassName } = props;
     const t = useTranslations("HomePage.MainPosts");
-    const initialSlide = Math.max(
-        0,
-        posts.findIndex((post) => post.id === "2")
-    );
     return (
         <Swiper
             onInit={(swiper) => {
@@ -32,7 +28,7 @@ const PostsSwiper: FC<PostsSwiperProps> = (props) => {
             }}
             grabCursor
             centeredSlides
-            initialSlide={initialSlide}
+            initialSlide={posts.length > 1 ? 1 : 0}
             slidesPerView={3}
             spaceBetween={24}
             modules={[Pagination, A11y]}
