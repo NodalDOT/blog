@@ -211,11 +211,6 @@
             padding: 1.2rem 0.4rem;
         }
 
-        &:focus-visible {
-            outline: 2px solid var(--text-color);
-            outline-offset: 4px;
-        }
-
         &[data-active="true"] {
             transform: translateY(-0.4rem);
             color: var(--text-contrast-color);

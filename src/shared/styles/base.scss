@@ -53,15 +53,17 @@ body {
 
     &:focus-visible {
         top: 1.6rem;
-        outline: 2px solid var(--focus-outline-color);
-        outline-offset: 2px;
     }
 }
 
-a:focus-visible,
-button:focus-visible {
-    outline: 2px solid var(--focus-outline-color);
-    outline-offset: 2px;
+:root :focus-visible {
+    outline: 2px solid white;
+    outline-offset: 0;
+    box-shadow: 0 0 0 4px black;
+
+    @media (forced-colors: active) {
+        outline-color: Highlight;
+    }
 }
 
 .container > main {

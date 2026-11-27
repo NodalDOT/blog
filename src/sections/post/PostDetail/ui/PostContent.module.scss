@@ -174,11 +174,6 @@
         }
     }
 
-    pre:focus-visible {
-        outline: 2px solid var(--focus-outline-color);
-        outline-offset: 2px;
-    }
-
     code {
         @include font-size(code-family);
     }

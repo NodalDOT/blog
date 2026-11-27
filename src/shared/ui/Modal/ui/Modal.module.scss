@@ -100,11 +100,6 @@
             color: var(--background-color);
             background: var(--text-color);
         }
-
-        &:focus-visible {
-            outline: 2px solid var(--text-color);
-            outline-offset: 3px;
-        }
     }
 }
 

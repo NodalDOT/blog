@@ -40,11 +40,6 @@
 
         transition-property: transform;
 
-        &:focus-visible {
-            outline: 2px solid var(--text-color);
-            outline-offset: 2px;
-        }
-
         &--active {
             .mobile-menu__line:nth-child(1) {
                 transform: translateY(0.85rem) rotate(45deg);
@@ -109,11 +104,6 @@
         &[aria-current="page"] {
             color: var(--text-contrast-color);
             background: var(--background-contrast-color);
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--text-color);
-            outline-offset: 3px;
         }
     }
 

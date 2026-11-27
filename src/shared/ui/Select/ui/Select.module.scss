@@ -195,13 +195,10 @@
 
         &:focus {
             background-color: transparent;
-            outline: none;
         }
 
         &:focus-visible {
             background-color: var(--hover-background-color);
-            outline: 2px solid var(--text-color);
-            outline-offset: -2px;
         }
 
         &:hover {

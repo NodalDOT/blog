@@ -27,7 +27,6 @@
         color: var(--text-color);
 
         background-color: transparent;
-        outline: none;
 
         @include mobile {
             padding: 1rem 1.2rem;
@@ -37,11 +36,6 @@
             @include font-size(body);
 
             color: var(--text-color);
-        }
-
-        &:focus-visible:not([data-pointer-focus]) {
-            outline: 2px solid var(--focus-outline-color);
-            outline-offset: 2px;
         }
     }
 

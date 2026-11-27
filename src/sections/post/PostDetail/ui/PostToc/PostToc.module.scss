@@ -115,6 +115,7 @@
         display: block;
 
         min-height: 24px;
+        border-radius: 0.2rem;
 
         color: var(--text-2-color);
         text-decoration: none;
@@ -130,11 +131,5 @@
 
     &__link:hover {
         color: var(--text-color);
-    }
-
-    &__link:focus-visible {
-        border-radius: 0.2rem;
-        outline: 2px solid var(--text-color);
-        outline-offset: 2px;
     }
 }

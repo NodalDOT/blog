@@ -97,13 +97,6 @@ button::-moz-focus-inner,
     border-style: none;
 }
 
-button:-moz-focusring,
-[type="button"]:-moz-focusring,
-[type="reset"]:-moz-focusring,
-[type="submit"]:-moz-focusring {
-    outline: 1px dotted ButtonText;
-}
-
 fieldset {
     padding: 0.35em 0.75em 0.625em;
 }
@@ -139,7 +132,6 @@ textarea {
 
 [type="search"] {
     appearance: textfield;
-    outline-offset: -2px;
 }
 
 [type="search"]::-webkit-search-decoration {

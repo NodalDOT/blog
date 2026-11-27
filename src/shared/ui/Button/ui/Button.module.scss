@@ -71,14 +71,6 @@
         background-color: var(--btn-active-before-bg);
     }
 
-    &:focus-visible {
-        outline: 2px solid var(--text-color);
-        outline-offset: 2px;
-        box-shadow:
-            0 0 0 2px var(--background-color),
-            0 0 0 4px var(--text-color);
-    }
-
     &--disabled {
         cursor: not-allowed;
         opacity: 0.6;
