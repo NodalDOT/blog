@@ -68,7 +68,12 @@ export async function GET() {
         })
     );
     const entries: SitemapEntry[] = localizedEntries.flat();
-    const entriesByPath = Map.groupBy(entries, (entry) => entry.path);
+    const entriesByPath = new Map<string, SitemapEntry[]>();
+    for (const entry of entries) {
+        const alternates = entriesByPath.get(entry.path) ?? [];
+        alternates.push(entry);
+        entriesByPath.set(entry.path, alternates);
+    }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
