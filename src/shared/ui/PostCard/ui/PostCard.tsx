@@ -15,7 +15,8 @@ export interface PostCardProps {
     title: string;
     subtitle: string;
     image: { src: string; alt: string; thumbnailSrc?: string };
-    videoUrl: string;
+    videoUrl?: string;
+    viewMode?: ViewMode;
 
     style?: React.CSSProperties;
 }
@@ -26,13 +27,14 @@ const PostCard: FC<PostCardProps> = ({
     subtitle,
     image,
     videoUrl,
+    viewMode = "image",
 
     ...otherProps
 }) => {
     const { startTransition } = usePageTransitionActions();
     const imageSrc = image.thumbnailSrc?.trim() || image.src;
     const hasImage = imageSrc.trim().length > 0;
-    const hasVideo = videoUrl.trim().length > 0;
+    const showVideo = viewMode === "video" && Boolean(videoUrl?.trim());
 
     return (
         <article data-id={id} className={classNames(styles["post-card"])} {...otherProps}>
@@ -63,13 +65,18 @@ const PostCard: FC<PostCardProps> = ({
                     />
                 )}
 
-                {hasVideo && (
+                {showVideo && (
                     <video
                         src={videoUrl}
+                        width={1200}
+                        height={675}
+                        autoPlay
                         muted
                         loop
                         playsInline
-                        preload="metadata"
+                        onPlaying={(event) => {
+                            event.currentTarget.dataset["playing"] = "true";
+                        }}
                         className={styles["post-card__video"]}
                         aria-hidden="true"
                         tabIndex={-1}

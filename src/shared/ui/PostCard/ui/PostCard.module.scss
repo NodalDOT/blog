@@ -36,6 +36,10 @@
 
     &__video {
         opacity: 0;
+
+        &[data-playing="true"] {
+            opacity: 1;
+        }
     }
 
     &__link,
@@ -170,16 +174,6 @@
 
                 transition-property: max-height, margin-bottom, opacity;
             }
-        }
-    }
-
-    [data-view-mode="video"] & {
-        &__image {
-            opacity: 0;
-        }
-
-        &__video {
-            opacity: 1;
         }
     }
 
